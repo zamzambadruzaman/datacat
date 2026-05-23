@@ -8,6 +8,7 @@ import DomainsPage from "./pages/DomainsPage";
 import TeamList from "./components/TeamList";
 import TeamDetail from "./components/TeamDetail";
 import LoginPage from "./pages/LoginPage";
+import UsersPage from "./pages/UsersPage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/domains" element={<DomainsPage />} />
         <Route path="/teams" element={<TeamList />} />
         <Route path="/teams/:teamId" element={<TeamDetail />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

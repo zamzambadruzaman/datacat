@@ -144,3 +144,19 @@ export const createAccessRequest = (data: {
   requester_email: string;
   message?: string;
 }) => apiFetch<AccessRequest>("/access-requests", { method: "POST", body: JSON.stringify(data) });
+
+// ── Users ─────────────────────────────────────────────────────────────────
+
+export interface User {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
+export const fetchUsers = () => apiFetch<User[]>("/users");
+
+export const createUser = (data: { email: string; password: string }) =>
+  apiFetch<User>("/users", { method: "POST", body: JSON.stringify(data) });
+
+export const deleteUser = (id: string) =>
+  apiFetch<void>(`/users/${id}`, { method: "DELETE" });

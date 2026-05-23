@@ -5,7 +5,9 @@ pydantic-settings>=2.6,<3
 
 # authentication dependencies
 passlib[bcrypt]>=1.7,<2
+bcrypt>=3.2,<4
 pyjwt>=2.8,<3
+python-multipart>=0.0.9,<1
 
 # dev / test
 pytest>=8.0,<9

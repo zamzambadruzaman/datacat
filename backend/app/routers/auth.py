@@ -10,6 +10,7 @@ header.
 import uuid
 from datetime import timedelta
 
+import duckdb
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
