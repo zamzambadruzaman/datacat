@@ -3,6 +3,19 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
+# ── User ────────────────────────────────────────────────────────────────────
+
+class UserCreate(BaseModel):
+    email: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=6)
+
+
+class UserOut(BaseModel):
+    id: str
+    email: str
+    created_at: datetime
+
+
 # ── Domain ──────────────────────────────────────────────────────────────────
 
 class DomainCreate(BaseModel):

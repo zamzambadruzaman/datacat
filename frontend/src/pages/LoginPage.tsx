@@ -32,7 +32,7 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto mt-12 p-6 border rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Login (API Key)</h2>
+      <h2 className="text-2xl font-bold mb-4">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1" htmlFor="email">
@@ -56,18 +56,6 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full border rounded px-2 py-1"
             required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="email">
-            User Email (optional)
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded px-2 py-1"
           />
         </div>
         <button

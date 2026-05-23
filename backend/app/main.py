@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import get_connection
-from app.routers import assets, domains, health, access_requests, team, team_members, test_data, auth
+from app.routers import assets, domains, health, access_requests, team, team_members, test_data, auth, users
 
 logging.basicConfig(level=settings.log_level.upper())
 logger = logging.getLogger("datacat")
@@ -44,3 +44,4 @@ app.include_router(team_members.router)
 if settings.enable_test_data_endpoint:
     app.include_router(test_data.router)
 app.include_router(auth.router)
+app.include_router(users.router)
