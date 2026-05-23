@@ -1,0 +1,12 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.32,<1
+duckdb>=1.1,<2
+pydantic-settings>=2.6,<3
+
+# authentication dependencies
+passlib[bcrypt]>=1.7,<2
+pyjwt>=2.8,<3
+
+# dev / test
+pytest>=8.0,<9
+httpx>=0.27,<1
