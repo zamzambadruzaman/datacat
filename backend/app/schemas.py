@@ -10,10 +10,17 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+class UserTeamMembership(BaseModel):
+    team_id: str
+    team_name: str
+    role: str
+
+
 class UserOut(BaseModel):
     id: str
     email: str
     is_superadmin: bool = False
+    teams: list[UserTeamMembership] = []
     created_at: datetime
 
 

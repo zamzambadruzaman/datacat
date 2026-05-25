@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.auth import get_current_user_optional, is_superadmin, is_superadmin_or_platform
 from app.auth_utils import hash_password
 from app.database import get_db
-from app.schemas import UserCreate, UserOut, UserTeamAssign
+from app.schemas import UserCreate, UserOut, UserTeamAssign, UserTeamMembership
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -51,13 +51,39 @@ def list_users(
     db: duckdb.DuckDBPyConnection = Depends(get_db),
     user_email: str | None = Depends(get_current_user_optional),
 ):
-    """List all users — superadmin only."""
+    """List all users with their team assignments — superadmin only."""
     email = _require_auth(user_email)
     _require_superadmin(email, db)
-    rows = db.execute(
+
+    # Fetch all users
+    users = db.execute(
         "SELECT id, email, is_superadmin, created_at FROM users ORDER BY created_at"
     ).fetchall()
-    return [_row_to_user(r) for r in rows]
+
+    # Fetch all non-platform team memberships in one query
+    memberships = db.execute(
+        "SELECT tm.email, t.id, t.name, tm.role "
+        "FROM team_members tm JOIN teams t ON tm.team_id = t.id "
+        "WHERE t.is_platform = FALSE ORDER BY t.name"
+    ).fetchall()
+
+    # Group memberships by user email
+    teams_by_email: dict[str, list[UserTeamMembership]] = {}
+    for m in memberships:
+        teams_by_email.setdefault(m[0], []).append(
+            UserTeamMembership(team_id=m[1], team_name=m[2], role=m[3])
+        )
+
+    return [
+        UserOut(
+            id=r[0],
+            email=r[1],
+            is_superadmin=bool(r[2]),
+            teams=teams_by_email.get(r[1], []),
+            created_at=r[3],
+        )
+        for r in users
+    ]
 
 
 @router.post("", response_model=UserOut, status_code=201)

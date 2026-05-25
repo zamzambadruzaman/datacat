@@ -153,10 +153,17 @@ export const createAccessRequest = (data: {
 
 // ── Users ─────────────────────────────────────────────────────────────────
 
+export interface UserTeamMembership {
+  team_id: string;
+  team_name: string;
+  role: string;
+}
+
 export interface User {
   id: string;
   email: string;
   is_superadmin: boolean;
+  teams: UserTeamMembership[];
   created_at: string;
 }
 
