@@ -58,7 +58,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             {isSuperadmin && (
               <>
                 <span className="mx-2 h-4 w-px bg-indigo-400 opacity-60" />
-                <span className="text-xs text-indigo-300 font-medium px-1">Admin</span>
                 {adminNav.map((n) => <NavLink key={n.to} {...n} />)}
               </>
             )}

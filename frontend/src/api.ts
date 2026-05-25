@@ -175,6 +175,9 @@ export const signup = (data: { email: string; password: string }) =>
 
 export const fetchMe = () => apiFetch<User>("/users/me");
 
+export const searchUsers = (q: string) =>
+  apiFetch<{ id: string; email: string }[]>(`/users/search?q=${encodeURIComponent(q)}`);
+
 export const fetchUsers = () => apiFetch<User[]>("/users");
 
 export const createUser = (data: { email: string; password: string }) =>

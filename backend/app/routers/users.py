@@ -26,6 +26,21 @@ def _row_to_user(row: tuple) -> UserOut:
     return UserOut(id=row[0], email=row[1], is_superadmin=bool(row[2]), created_at=row[3])
 
 
+@router.get("/search")
+def search_users(
+    q: str = "",
+    db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
+):
+    """Search registered users by email — any authenticated user (for team-member autocomplete)."""
+    _require_auth(user_email)
+    rows = db.execute(
+        "SELECT id, email FROM users WHERE email ILIKE ? ORDER BY email LIMIT 10",
+        [f"%{q}%"],
+    ).fetchall()
+    return [{"id": r[0], "email": r[1]} for r in rows]
+
+
 @router.get("/me")
 def get_me(
     db: duckdb.DuckDBPyConnection = Depends(get_db),

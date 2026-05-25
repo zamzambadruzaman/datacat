@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchTeamMembers, addTeamMember, updateTeamMemberRole, removeTeamMember, TeamMember } from "../api";
-import { useState } from "react";
+import { fetchTeamMembers, addTeamMember, updateTeamMemberRole, removeTeamMember, searchUsers, TeamMember } from "../api";
+import { useState, useRef } from "react";
 
 const ROLES = ["manager", "member"] as const;
 type Role = typeof ROLES[number];
@@ -25,6 +25,16 @@ export default function TeamDetail() {
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<Role>("member");
   const [addError, setAddError] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch matching users as the email input changes
+  const { data: suggestions = [] } = useQuery({
+    queryKey: ["user-search", newEmail],
+    queryFn: () => searchUsers(newEmail),
+    enabled: newEmail.length > 0,
+    staleTime: 10_000,
+  });
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["team-members", teamId],
@@ -34,6 +44,18 @@ export default function TeamDetail() {
 
   const currentMember = members.find((m) => m.email === currentEmail);
   const isManager = currentMember?.role === "manager" || currentMember?.role === "owner";
+
+  const memberEmails = new Set(members.map((m) => m.email.toLowerCase()));
+  const filteredSuggestions = suggestions.filter(
+    (s) => !memberEmails.has(s.email.toLowerCase())
+  );
+  const inputHasText = newEmail.trim().length > 0;
+  const exactMatch = filteredSuggestions.some(
+    (s) => s.email.toLowerCase() === newEmail.trim().toLowerCase()
+  );
+  // "not found" only if there are no results at all (including already-members)
+  const allMatches = suggestions.length;
+  const noUserFound = inputHasText && allMatches === 0;
 
   const addMut = useMutation({
     mutationFn: () => addTeamMember(teamId!, { email: newEmail.trim(), role: newRole }),
@@ -72,17 +94,55 @@ export default function TeamDetail() {
         <div className="rounded-lg border bg-white p-5 shadow-sm">
           <h2 className="text-base font-semibold text-gray-700 mb-3">Add member</h2>
           <form
-            onSubmit={(e) => { e.preventDefault(); addMut.mutate(); }}
-            className="flex gap-2 flex-wrap"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (noUserFound) return;
+              addMut.mutate();
+            }}
+            className="flex gap-2 flex-wrap items-start"
           >
-            <input
-              type="email"
-              required
-              placeholder="user@example.com"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="flex-1 min-w-48 rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"
-            />
+            {/* Email input with autocomplete dropdown */}
+            <div className="relative flex-1 min-w-48">
+              <input
+                ref={inputRef}
+                type="text"
+                required
+                placeholder="Search by email…"
+                value={newEmail}
+                onChange={(e) => { setNewEmail(e.target.value); setShowSuggestions(true); setAddError(""); }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                autoComplete="off"
+                className={`w-full rounded border px-2 py-1.5 text-sm shadow-sm focus:outline-none ${
+                  noUserFound
+                    ? "border-red-400 focus:border-red-500"
+                    : "border-gray-300 focus:border-indigo-500"
+                }`}
+              />
+
+              {/* Suggestions dropdown */}
+              {showSuggestions && inputHasText && filteredSuggestions.length > 0 && (
+                <ul className="absolute z-10 mt-1 w-full rounded border border-gray-200 bg-white shadow-md text-sm overflow-hidden">
+                  {filteredSuggestions.map((s) => (
+                    <li
+                      key={s.id}
+                      onMouseDown={() => { setNewEmail(s.email); setShowSuggestions(false); }}
+                      className="cursor-pointer px-3 py-2 hover:bg-indigo-50 font-mono"
+                    >
+                      {s.email}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* "User not found" hint */}
+              {noUserFound && (
+                <p className="mt-1 text-xs text-red-500">
+                  User not found — check the email or ask them to register first.
+                </p>
+              )}
+            </div>
+
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as Role)}
@@ -93,7 +153,7 @@ export default function TeamDetail() {
             </select>
             <button
               type="submit"
-              disabled={!newEmail || addMut.isPending}
+              disabled={!exactMatch || addMut.isPending}
               className="rounded bg-indigo-600 px-4 py-1.5 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
             >
               {addMut.isPending ? "Adding…" : "Add"}
