@@ -1,84 +1,164 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchUsers, createUser, deleteUser } from "../api";
+import {
+  fetchMe, fetchUsers, fetchTeams,
+  createUser, deleteUser, setSuperadmin,
+  assignUserToTeam, removeUserFromTeam,
+  User, Team, UserTeamMembership,
+} from "../api";
+
+// ── small helpers ─────────────────────────────────────────────────────────────
+
+function SuperadminBadge() {
+  return (
+    <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+      superadmin
+    </span>
+  );
+}
+
+// ── assign-to-team inline form ────────────────────────────────────────────────
+
+function AssignTeamForm({
+  userId,
+  teams,
+  onDone,
+}: {
+  userId: string;
+  teams: Team[];
+  onDone: () => void;
+}) {
+  const qc = useQueryClient();
+  const [teamId, setTeamId] = useState(teams[0]?.id ?? "");
+  const [role, setRole] = useState("member");
+  const [err, setErr] = useState("");
+
+  const mut = useMutation({
+    mutationFn: () => assignUserToTeam(userId, { team_id: teamId, role }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); onDone(); },
+    onError: (e: Error) => setErr(e.message),
+  });
+
+  return (
+    <form
+      onSubmit={(e) => { e.preventDefault(); mut.mutate(); }}
+      className="flex gap-2 flex-wrap items-center mt-1"
+    >
+      <select
+        value={teamId}
+        onChange={(e) => setTeamId(e.target.value)}
+        className="rounded border border-gray-300 px-2 py-1 text-xs"
+      >
+        {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+      </select>
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className="rounded border border-gray-300 px-2 py-1 text-xs"
+      >
+        <option value="member">member</option>
+        <option value="manager">manager</option>
+      </select>
+      <button
+        type="submit"
+        disabled={mut.isPending}
+        className="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700 disabled:opacity-50"
+      >
+        {mut.isPending ? "…" : "Assign"}
+      </button>
+      <button type="button" onClick={onDone} className="text-xs text-gray-400 hover:text-gray-600">
+        cancel
+      </button>
+      {err && <span className="text-xs text-red-500">{err}</span>}
+    </form>
+  );
+}
+
+// ── main page ─────────────────────────────────────────────────────────────────
 
 export default function UsersPage() {
   const qc = useQueryClient();
-  const { data: users = [], isLoading, error } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-  });
+  const currentEmail = localStorage.getItem("datacat_user_email") ?? "";
+
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+  const { data: users = [], isLoading, error } = useQuery({ queryKey: ["users"], queryFn: fetchUsers });
+  const { data: teams = [] } = useQuery({ queryKey: ["teams"], queryFn: fetchTeams });
+
+  const isSuperadmin = me?.is_superadmin ?? false;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
+  const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
 
-  const createMutation = useMutation({
+  const createMut = useMutation({
     mutationFn: createUser,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["users"] });
-      setEmail("");
-      setPassword("");
-      setFormError("");
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["users"] }); setEmail(""); setPassword(""); setFormError(""); },
     onError: (e: Error) => setFormError(e.message),
   });
 
-  const deleteMutation = useMutation({
+  const superadminMut = useMutation({
+    mutationFn: ({ id, promote }: { id: string; promote: boolean }) => setSuperadmin(id, promote),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+  });
+
+  const deleteMut = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
   });
 
-  function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setFormError("");
-    createMutation.mutate({ email: email.trim(), password });
-  }
+  const removeTeamMut = useMutation({
+    mutationFn: ({ userId, teamId }: { userId: string; teamId: string }) =>
+      removeUserFromTeam(userId, teamId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+  });
 
+  if (!me && !isLoading) return <p className="text-red-500">Please log in.</p>;
+  if (me && !me.is_superadmin) {
+    return (
+      <div className="mt-16 text-center space-y-2">
+        <p className="text-2xl">🔒</p>
+        <p className="font-semibold text-gray-700">Superadmin access required</p>
+        <p className="text-sm text-gray-400">Only superadmins can manage users.</p>
+      </div>
+    );
+  }
   if (isLoading) return <p className="text-gray-500">Loading…</p>;
-  if (error) return <p className="text-red-500">Failed to load users. Are you logged in?</p>;
+  if (error) return <p className="text-red-500">Failed to load users.</p>;
+
+  // Non-platform teams only (hide the Platform admin team from the assign dropdown)
+  const assignableTeams = teams.filter((t: any) => !t.is_platform);
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Users</h1>
-
-      {/* Create user form — platform team members only */}
-      <div className="border rounded p-4 bg-white shadow-sm max-w-md">
-        <h2 className="text-lg font-semibold mb-3">Add user</h2>
-        <form onSubmit={handleCreate} className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border rounded px-2 py-1 text-sm"
-              placeholder="user@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full border rounded px-2 py-1 text-sm"
-              placeholder="Min. 6 characters"
-            />
-          </div>
-          {formError && <p className="text-red-500 text-sm">{formError}</p>}
-          <button
-            type="submit"
-            disabled={createMutation.isPending}
-            className="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {createMutation.isPending ? "Creating…" : "Create user"}
-          </button>
-        </form>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">Users</h1>
+        {isSuperadmin && <SuperadminBadge />}
       </div>
+
+      {/* Create user — superadmin only */}
+      {isSuperadmin && (
+        <div className="border rounded p-4 bg-white shadow-sm max-w-md">
+          <h2 className="text-base font-semibold mb-3">Add user</h2>
+          <form onSubmit={(e) => { e.preventDefault(); createMut.mutate({ email: email.trim(), password }); }} className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                className="w-full border rounded px-2 py-1.5 text-sm" placeholder="user@example.com" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+                className="w-full border rounded px-2 py-1.5 text-sm" placeholder="Min. 6 characters" />
+            </div>
+            {formError && <p className="text-red-500 text-sm">{formError}</p>}
+            <button type="submit" disabled={createMut.isPending}
+              className="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm hover:bg-indigo-700 disabled:opacity-50">
+              {createMut.isPending ? "Creating…" : "Create user"}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Users table */}
       <div className="bg-white shadow-sm rounded border overflow-hidden">
@@ -86,39 +166,104 @@ export default function UsersPage() {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-2 font-medium text-gray-600">Email</th>
-              <th className="text-left px-4 py-2 font-medium text-gray-600">Created</th>
-              <th className="px-4 py-2" />
+              <th className="text-left px-4 py-2 font-medium text-gray-600">Role</th>
+              <th className="text-left px-4 py-2 font-medium text-gray-600">Teams</th>
+              {isSuperadmin && <th className="text-left px-4 py-2 font-medium text-gray-600">Assign to team</th>}
+              {isSuperadmin && <th className="px-4 py-2" />}
             </tr>
           </thead>
           <tbody>
             {users.length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-4 py-6 text-center text-gray-400">
-                  No users yet.
-                </td>
-              </tr>
+              <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-400">No users yet.</td></tr>
             )}
-            {users.map((u) => (
-              <tr key={u.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2 font-mono">{u.email}</td>
-                <td className="px-4 py-2 text-gray-500">
-                  {new Date(u.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <button
-                    onClick={() => {
-                      if (confirm(`Delete ${u.email}?`)) deleteMutation.mutate(u.id);
-                    }}
-                    className="text-red-500 hover:text-red-700 text-xs"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {users.map((u: User) => {
+              const isSelf = u.email === currentEmail;
+              return (
+                <tr key={u.id} className="border-t hover:bg-gray-50 align-top">
+                  <td className="px-4 py-3 font-mono">{u.email}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1 items-center">
+                      {u.is_superadmin && <SuperadminBadge />}
+                      {!u.is_superadmin && <span className="text-gray-400 text-xs">—</span>}
+                      {isSuperadmin && !isSelf && (
+                        <button
+                          onClick={() => superadminMut.mutate({ id: u.id, promote: !u.is_superadmin })}
+                          className={`text-xs underline ${u.is_superadmin ? "text-red-400 hover:text-red-600" : "text-indigo-400 hover:text-indigo-600"}`}
+                        >
+                          {u.is_superadmin ? "revoke" : "promote"}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  {/* Teams column — visible to everyone */}
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {(u.teams ?? []).length === 0 && (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
+                      {(u.teams ?? []).map((tm: UserTeamMembership) => (
+                        <span
+                          key={tm.team_id}
+                          className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-xs text-indigo-700"
+                        >
+                          <span className="font-medium">{tm.team_name}</span>
+                          <span className={`rounded px-1 text-[10px] font-semibold ${
+                            tm.role === "manager" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"
+                          }`}>{tm.role}</span>
+                          {isSuperadmin && (
+                            <button
+                              title={`Remove from ${tm.team_name}`}
+                              onClick={() => removeTeamMut.mutate({ userId: u.id, teamId: tm.team_id })}
+                              className="ml-0.5 text-indigo-300 hover:text-red-500 leading-none"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  {/* Assign to team column — superadmin only */}
+                  {isSuperadmin && (
+                    <td className="px-4 py-3">
+                      {assigningUserId === u.id ? (
+                        <AssignTeamForm
+                          userId={u.id}
+                          teams={assignableTeams}
+                          onDone={() => setAssigningUserId(null)}
+                        />
+                      ) : (
+                        <button
+                          onClick={() => setAssigningUserId(u.id)}
+                          className="text-xs text-indigo-500 hover:text-indigo-700 underline"
+                        >
+                          + assign
+                        </button>
+                      )}
+                    </td>
+                  )}
+                  {isSuperadmin && (
+                    <td className="px-4 py-3 text-right">
+                      {!isSelf && (
+                        <button
+                          onClick={() => { if (confirm(`Delete ${u.email}?`)) deleteMut.mutate(u.id); }}
+                          className="text-red-400 hover:text-red-600 text-xs"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {!isSuperadmin && (
+        <p className="text-sm text-gray-400">Contact a superadmin to be assigned to a team.</p>
+      )}
     </div>
   );
 }

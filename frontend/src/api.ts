@@ -93,6 +93,12 @@ export const fetchTeamMembers = (teamId: string) =>
 export const addTeamMember = (teamId: string, data: { email: string; role?: string }) =>
   apiFetch<TeamMember>(`/teams/${teamId}/members`, { method: "POST", body: JSON.stringify(data) });
 
+export const updateTeamMemberRole = (teamId: string, memberEmail: string, role: string) =>
+  apiFetch<TeamMember>(`/teams/${teamId}/members/${memberEmail}`, {
+    method: "PUT",
+    body: JSON.stringify({ role }),
+  });
+
 export const removeTeamMember = (teamId: string, memberEmail: string) =>
   apiFetch<void>(`/teams/${teamId}/members/${memberEmail}`, { method: "DELETE" });
 
@@ -147,16 +153,47 @@ export const createAccessRequest = (data: {
 
 // ── Users ─────────────────────────────────────────────────────────────────
 
+export interface UserTeamMembership {
+  team_id: string;
+  team_name: string;
+  role: string;
+}
+
 export interface User {
   id: string;
   email: string;
+  is_superadmin: boolean;
+  teams: UserTeamMembership[];
   created_at: string;
 }
+
+export const signup = (data: { email: string; password: string }) =>
+  apiFetch<{ id: string; email: string }>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+export const fetchMe = () => apiFetch<User>("/users/me");
+
+export const searchUsers = (q: string) =>
+  apiFetch<{ id: string; email: string }[]>(`/users/search?q=${encodeURIComponent(q)}`);
 
 export const fetchUsers = () => apiFetch<User[]>("/users");
 
 export const createUser = (data: { email: string; password: string }) =>
   apiFetch<User>("/users", { method: "POST", body: JSON.stringify(data) });
+
+export const setSuperadmin = (userId: string, promote: boolean) =>
+  apiFetch<User>(`/users/${userId}/superadmin?promote=${promote}`, { method: "PUT" });
+
+export const assignUserToTeam = (userId: string, data: { team_id: string; role: string }) =>
+  apiFetch<{ id: string; team_name: string; role: string }>(
+    `/users/${userId}/teams`,
+    { method: "POST", body: JSON.stringify(data) }
+  );
+
+export const removeUserFromTeam = (userId: string, teamId: string) =>
+  apiFetch<void>(`/users/${userId}/teams/${teamId}`, { method: "DELETE" });
 
 export const deleteUser = (id: string) =>
   apiFetch<void>(`/users/${id}`, { method: "DELETE" });

@@ -10,10 +10,23 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+class UserTeamMembership(BaseModel):
+    team_id: str
+    team_name: str
+    role: str
+
+
 class UserOut(BaseModel):
     id: str
     email: str
+    is_superadmin: bool = False
+    teams: list[UserTeamMembership] = []
     created_at: datetime
+
+
+class UserTeamAssign(BaseModel):
+    team_id: str
+    role: str = "member"  # "manager" or "member"
 
 
 # ── Domain ──────────────────────────────────────────────────────────────────
@@ -57,7 +70,12 @@ class TeamOut(BaseModel):
 
 class TeamMemberCreate(BaseModel):
     email: str
-    role: str = "member"  # "owner" or "member"
+    role: str = "member"  # "manager" or "member"
+
+
+class TeamMemberUpdate(BaseModel):
+    role: str  # "manager" or "member"
+
 
 class TeamMemberOut(BaseModel):
     id: str
