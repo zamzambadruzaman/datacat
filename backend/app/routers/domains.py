@@ -6,8 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import (
     get_current_user,
+    get_current_user_optional,
     is_platform_team_member,
-    is_team_member,
+    is_superadmin_or_platform,
+    is_team_manager,
 )
 from app.database import get_db
 from app.schemas import DomainCreate, DomainOut, DomainUpdate
@@ -29,12 +31,30 @@ def _row_to_domain(row: tuple) -> DomainOut:
 @router.get("", response_model=list[DomainOut])
 async def list_domains(
     db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
 ):
-    """List all domains (public endpoint)."""
-    rows = db.execute(
-        "SELECT id, name, description, team_id, created_at, updated_at "
-        "FROM domains ORDER BY name"
-    ).fetchall()
+    """List domains.
+
+    - Superadmin: all domains.
+    - Authenticated user: only domains belonging to their teams.
+    - Unauthenticated: 401.
+    """
+    if not user_email:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    if is_superadmin_or_platform(user_email, db):
+        rows = db.execute(
+            "SELECT id, name, description, team_id, created_at, updated_at "
+            "FROM domains ORDER BY name"
+        ).fetchall()
+    else:
+        rows = db.execute(
+            "SELECT d.id, d.name, d.description, d.team_id, d.created_at, d.updated_at "
+            "FROM domains d JOIN team_members tm ON d.team_id = tm.team_id "
+            "WHERE tm.email = ? ORDER BY d.name",
+            [user_email],
+        ).fetchall()
+
     return [_row_to_domain(r) for r in rows]
 
 
@@ -45,9 +65,9 @@ async def create_domain(
     user_email: str = Depends(get_current_user),
 ):
     """Create a new domain (team members only)."""
-    # Verify user is member of the team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, body.team_id, db)):
-        raise HTTPException(status_code=403, detail="Not authorized to create domains in this team")
+    # Only managers (or platform team) can create domains
+    if not (is_platform_team_member(user_email, db) or is_team_manager(user_email, body.team_id, db)):
+        raise HTTPException(status_code=403, detail="Only team managers can create domains")
     
     domain_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc)
@@ -99,9 +119,9 @@ async def update_domain(
     
     team_id = existing[1]
     
-    # Check authorization: platform team OR domain's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
-        raise HTTPException(status_code=403, detail="Not authorized to update this domain")
+    # Only managers (or platform team) can update domains
+    if not (is_platform_team_member(user_email, db) or is_team_manager(user_email, team_id, db)):
+        raise HTTPException(status_code=403, detail="Only team managers can update domains")
 
     updates = body.model_dump(exclude_unset=True)
     if not updates:
@@ -131,9 +151,9 @@ async def delete_domain(
     
     team_id = existing[1]
     
-    # Check authorization: platform team OR domain's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
-        raise HTTPException(status_code=403, detail="Not authorized to delete this domain")
+    # Only managers (or platform team) can delete domains
+    if not (is_platform_team_member(user_email, db) or is_team_manager(user_email, team_id, db)):
+        raise HTTPException(status_code=403, detail="Only team managers can delete domains")
     
     # Cascade delete assets in this domain
     db.execute("DELETE FROM assets WHERE domain_id = ?", [domain_id])

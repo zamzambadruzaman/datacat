@@ -80,12 +80,18 @@ def _init_tables(conn: duckdb.DuckDBPyConnection) -> None:
     # ---------------------------------------------------------------------
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id          VARCHAR PRIMARY KEY,
-            email       VARCHAR NOT NULL UNIQUE,
-            password    VARCHAR NOT NULL,  -- bcrypt hash
-            created_at  TIMESTAMP DEFAULT current_timestamp
+            id             VARCHAR PRIMARY KEY,
+            email          VARCHAR NOT NULL UNIQUE,
+            password       VARCHAR NOT NULL,
+            is_superadmin  BOOLEAN DEFAULT FALSE,
+            created_at     TIMESTAMP DEFAULT current_timestamp
         )
     """)
+    # Migration: add is_superadmin to existing databases that predate this column
+    # PRAGMA table_info returns (cid, name, type, notnull, dflt_value, pk)
+    cols = [r[1] for r in conn.execute("PRAGMA table_info('users')").fetchall()]
+    if "is_superadmin" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN is_superadmin BOOLEAN DEFAULT FALSE")
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:
@@ -95,6 +101,7 @@ def get_connection() -> duckdb.DuckDBPyConnection:
         _connection = duckdb.connect(settings.db_path)
         _init_tables(_connection)
         _create_platform_team(_connection)
+        _bootstrap_superadmin(_connection)
     return _connection
 
 
@@ -107,6 +114,22 @@ def _create_platform_team(conn: duckdb.DuckDBPyConnection) -> None:
         conn.execute(
             "INSERT INTO teams (id, name, description, is_platform) VALUES (?, ?, ?, ?)",
             [platform_id, "Platform", "Data Platform Team with global access", True],
+        )
+
+
+def _bootstrap_superadmin(conn: duckdb.DuckDBPyConnection) -> None:
+    """If no superadmin exists yet, promote the earliest registered user."""
+    has_superadmin = conn.execute(
+        "SELECT 1 FROM users WHERE is_superadmin = TRUE LIMIT 1"
+    ).fetchone()
+    if has_superadmin:
+        return
+    first_user = conn.execute(
+        "SELECT id FROM users ORDER BY created_at LIMIT 1"
+    ).fetchone()
+    if first_user:
+        conn.execute(
+            "UPDATE users SET is_superadmin = TRUE WHERE id = ?", [first_user[0]]
         )
 
 

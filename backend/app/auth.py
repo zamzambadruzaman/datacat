@@ -30,22 +30,24 @@ async def optional_api_key(
 
 
 async def get_current_user(
-    _key: str = Depends(require_api_key),
+    api_key: str | None = Security(_api_key_header),
     token: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> str:
-    """Extract current user e‑mail from a JWT bearer token.
+    """Return the current user's e-mail from a JWT bearer token or API key.
 
-    If a valid token is present, its ``sub`` claim (the e‑mail) is returned.
-    If no token is supplied, we fall back to the default user (useful for
-    quick testing without auth).  Invalid or expired tokens raise 401.
+    Priority:
+    1. Valid JWT → return e-mail from ``sub`` claim.
+    2. Valid API key (no JWT) → return the configured default user (machine-to-machine).
+    3. Otherwise → 401.
     """
     if token:
         email = decode_access_token(token.credentials)
         if email:
             return email
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    # No token – use the default (development mode)
-    return settings.default_user_email
+    if api_key and hmac.compare_digest(api_key, settings.api_key):
+        return settings.default_user_email
+    raise HTTPException(status_code=401, detail="Authentication required")
 
 
 async def get_current_user_optional(
@@ -57,6 +59,19 @@ async def get_current_user_optional(
     if token:
         return decode_access_token(token.credentials)
     return None
+
+
+def is_superadmin(user_email: str, db: duckdb.DuckDBPyConnection) -> bool:
+    """Check if the user has the superadmin flag set."""
+    result = db.execute(
+        "SELECT is_superadmin FROM users WHERE email = ?", [user_email]
+    ).fetchone()
+    return bool(result and result[0])
+
+
+def is_superadmin_or_platform(user_email: str, db: duckdb.DuckDBPyConnection) -> bool:
+    """Check if user is superadmin OR a platform team member (either grants global access)."""
+    return is_superadmin(user_email, db) or is_platform_team_member(user_email, db)
 
 
 def is_platform_team_member(user_email: str, db: duckdb.DuckDBPyConnection) -> bool:
@@ -71,9 +86,18 @@ def is_platform_team_member(user_email: str, db: duckdb.DuckDBPyConnection) -> b
 
 
 def is_team_member(user_email: str, team_id: str, db: duckdb.DuckDBPyConnection) -> bool:
-    """Check if user is a member of a specific team."""
+    """Check if user is a member (any role) of a specific team."""
     result = db.execute(
         "SELECT 1 FROM team_members WHERE team_id = ? AND email = ?",
+        [team_id, user_email],
+    ).fetchone()
+    return result is not None
+
+
+def is_team_manager(user_email: str, team_id: str, db: duckdb.DuckDBPyConnection) -> bool:
+    """Check if user has manager (or legacy owner) role in a specific team."""
+    result = db.execute(
+        "SELECT 1 FROM team_members WHERE team_id = ? AND email = ? AND role IN ('manager', 'owner')",
         [team_id, user_email],
     ).fetchone()
     return result is not None

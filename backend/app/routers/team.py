@@ -9,7 +9,7 @@ import uuid
 import duckdb
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.auth import get_current_user
+from app.auth import get_current_user, get_current_user_optional, is_superadmin_or_platform
 from app.database import get_db
 from app.schemas import TeamCreate, TeamUpdate, TeamOut
 
@@ -27,10 +27,33 @@ def _check_team_owner(team_id: str, user_email: str, db: duckdb.DuckDBPyConnecti
 
 
 @router.get("", response_model=list[TeamOut])
-def list_teams(db: duckdb.DuckDBPyConnection = Depends(get_db)):
-    """List all teams (public endpoint)."""
-    rows = db.execute("SELECT id, name, description, is_platform FROM teams").fetchall()
-    return [TeamOut(id=row[0], name=row[1], description=row[2], is_platform=row[3]) for row in rows]
+def list_teams(
+    db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
+):
+    """List teams.
+
+    - Superadmin: all teams (excluding the internal platform team).
+    - Authenticated user: only teams they are a member of.
+    - Unauthenticated: 401.
+    """
+    if not user_email:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    if is_superadmin_or_platform(user_email, db):
+        rows = db.execute(
+            "SELECT id, name, description, is_platform FROM teams WHERE is_platform = FALSE ORDER BY name"
+        ).fetchall()
+    else:
+        rows = db.execute(
+            "SELECT t.id, t.name, t.description, t.is_platform "
+            "FROM teams t JOIN team_members tm ON t.id = tm.team_id "
+            "WHERE tm.email = ? AND t.is_platform = FALSE ORDER BY t.name",
+            [user_email],
+        ).fetchall()
+
+    return [TeamOut(id=r[0], name=r[1], description=r[2], is_platform=r[3]) for r in rows]
 
 
 @router.post("", response_model=TeamOut, status_code=status.HTTP_201_CREATED)
