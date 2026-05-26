@@ -74,8 +74,16 @@ export default function Layout({ children }: { children: ReactNode }) {
       <nav className="bg-white border-b border-gray-200 shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center px-4 py-3 gap-2">
           {/* Brand */}
-          <Link to="/" className="text-xl font-bold tracking-tight mr-4 text-fuchsia-800">
-            datacat
+          <Link to="/" className="flex items-center gap-2 mr-5 group">
+            <div className="w-7 h-7 rounded-lg bg-fuchsia-800 flex items-center justify-center flex-shrink-0 group-hover:bg-fuchsia-900 transition-colors">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3M4 7v5c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 12v5c0 1.657 3.582 3 8 3s8-1.343 8-3v-5" />
+              </svg>
+            </div>
+            <span className="text-2xl font-black tracking-tight text-fuchsia-800 group-hover:text-fuchsia-900 transition-colors">
+              datacat
+            </span>
           </Link>
 
           {/* Main nav */}
