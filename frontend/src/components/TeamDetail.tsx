@@ -9,8 +9,10 @@ type Role = typeof ROLES[number];
 function RoleBadge({ role }: { role: string }) {
   const isManager = role === "manager" || role === "owner";
   return (
-    <span className={`rounded px-2 py-0.5 text-xs font-semibold ${
-      isManager ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-700"
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+      isManager
+        ? "bg-fuchsia-100 border border-fuchsia-300 text-fuchsia-900"
+        : "bg-gray-100 border border-gray-200 text-gray-600"
     }`}>
       {isManager ? "manager" : "member"}
     </span>
@@ -28,7 +30,6 @@ export default function TeamDetail() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch matching users as the email input changes
   const { data: suggestions = [] } = useQuery({
     queryKey: ["user-search", newEmail],
     queryFn: () => searchUsers(newEmail),
@@ -53,7 +54,6 @@ export default function TeamDetail() {
   const exactMatch = filteredSuggestions.some(
     (s) => s.email.toLowerCase() === newEmail.trim().toLowerCase()
   );
-  // "not found" only if there are no results at all (including already-members)
   const allMatches = suggestions.length;
   const noUserFound = inputHasText && allMatches === 0;
 
@@ -83,16 +83,15 @@ export default function TeamDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/teams" className="text-indigo-600 hover:text-indigo-700 text-sm">
+      <Link to="/teams" className="inline-flex items-center text-sm font-medium text-fuchsia-800 hover:text-fuchsia-900 transition-colors">
         ← Back to Teams
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-800">Team Members</h1>
+      <h1 className="text-2xl font-bold text-gray-900">Team Members</h1>
 
-      {/* Add member form — managers only */}
       {isManager && (
-        <div className="rounded-lg border bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-700 mb-3">Add member</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-800 mb-3">Add member</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -101,7 +100,6 @@ export default function TeamDetail() {
             }}
             className="flex gap-2 flex-wrap items-start"
           >
-            {/* Email input with autocomplete dropdown */}
             <div className="relative flex-1 min-w-48">
               <input
                 ref={inputRef}
@@ -113,21 +111,20 @@ export default function TeamDetail() {
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                 autoComplete="off"
-                className={`w-full rounded border px-2 py-1.5 text-sm shadow-sm focus:outline-none ${
+                className={`w-full rounded-lg border px-3 py-1.5 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${
                   noUserFound
-                    ? "border-red-400 focus:border-red-500"
-                    : "border-gray-300 focus:border-indigo-500"
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-gray-300 focus:border-fuchsia-700 focus:ring-fuchsia-700/20"
                 }`}
               />
 
-              {/* Suggestions dropdown */}
               {showSuggestions && inputHasText && filteredSuggestions.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full rounded border border-gray-200 bg-white shadow-md text-sm overflow-hidden">
+                <ul className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
                   {filteredSuggestions.map((s) => (
                     <li
                       key={s.id}
                       onMouseDown={() => { setNewEmail(s.email); setShowSuggestions(false); }}
-                      className="cursor-pointer px-3 py-2 hover:bg-indigo-50 font-mono"
+                      className="cursor-pointer px-3 py-2 hover:bg-fuchsia-100 font-mono transition-colors"
                     >
                       {s.email}
                     </li>
@@ -135,7 +132,6 @@ export default function TeamDetail() {
                 </ul>
               )}
 
-              {/* "User not found" hint */}
               {noUserFound && (
                 <p className="mt-1 text-xs text-red-500">
                   User not found — check the email or ask them to register first.
@@ -146,7 +142,7 @@ export default function TeamDetail() {
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as Role)}
-              className="rounded border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm shadow-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
             >
               <option value="member">Member</option>
               <option value="manager">Manager</option>
@@ -154,7 +150,7 @@ export default function TeamDetail() {
             <button
               type="submit"
               disabled={!exactMatch || addMut.isPending}
-              className="rounded bg-indigo-600 px-4 py-1.5 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-lg bg-fuchsia-800 px-4 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
             >
               {addMut.isPending ? "Adding…" : "Add"}
             </button>
@@ -163,31 +159,30 @@ export default function TeamDetail() {
         </div>
       )}
 
-      {/* Members table */}
-      <div className="overflow-hidden rounded-lg border shadow-sm bg-white">
+      <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-5 py-3 text-left font-medium text-gray-600">Email</th>
-              <th className="px-5 py-3 text-left font-medium text-gray-600">Role</th>
-              {isManager && <th className="px-5 py-3 text-right font-medium text-gray-600">Actions</th>}
+              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Email</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Role</th>
+              {isManager && <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-gray-100">
             {members.length === 0 && (
               <tr>
                 <td colSpan={3} className="px-5 py-6 text-center text-gray-400">No members yet.</td>
               </tr>
             )}
             {members.map((m: TeamMember) => (
-              <tr key={m.id} className="hover:bg-gray-50">
+              <tr key={m.id} className="hover:bg-fuchsia-100/20 transition-colors">
                 <td className="px-5 py-3 text-gray-800 font-mono">{m.email}</td>
                 <td className="px-5 py-3">
                   {isManager && m.email !== currentEmail ? (
                     <select
                       value={m.role === "owner" ? "manager" : m.role}
                       onChange={(e) => roleMut.mutate({ email: m.email, role: e.target.value })}
-                      className="rounded border border-gray-300 px-1.5 py-0.5 text-xs focus:border-indigo-500 focus:outline-none"
+                      className="rounded-lg border border-gray-300 px-2 py-0.5 text-xs transition focus:border-fuchsia-700 focus:outline-none focus:ring-1 focus:ring-fuchsia-700/20"
                     >
                       <option value="member">member</option>
                       <option value="manager">manager</option>
@@ -204,7 +199,7 @@ export default function TeamDetail() {
                           if (confirm(`Remove ${m.email} from this team?`)) removeMut.mutate(m.email);
                         }}
                         disabled={removeMut.isPending}
-                        className="text-red-500 hover:text-red-700 text-xs"
+                        className="text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
                       >
                         Remove
                       </button>

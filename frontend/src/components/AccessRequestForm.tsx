@@ -2,11 +2,6 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createAccessRequest } from "../api";
 
-/**
- * Simple form that lets a data consumer request access to an asset.
- * It posts to the backend ``/api/access-requests`` endpoint and shows a
- * success / error message.
- */
 export default function AccessRequestForm({ assetId }: { assetId: string }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -30,31 +25,31 @@ export default function AccessRequestForm({ assetId }: { assetId: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded border p-4">
-      <h3 className="text-lg font-medium text-gray-800">Request Access</h3>
+    <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <h3 className="text-base font-semibold text-gray-800">Request Access</h3>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Your Email</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Email</label>
         <input
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Message (optional)</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">Message (optional)</label>
         <textarea
           rows={3}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
         />
       </div>
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
+        className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm"
       >
         {mutation.isPending ? "Sending…" : "Send Request"}
       </button>

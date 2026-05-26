@@ -49,7 +49,6 @@ export default function AssetDetail() {
   const currentEmail = getUserEmail();
   const canManage = !!currentEmail && !!teamMembers?.some((m) => m.email === currentEmail);
 
-  // Parse schema — supports new array format and legacy {col: type} object format
   let schemaColumns: SchemaColumn[] | null = null;
   try {
     const parsed = JSON.parse(asset.schema_json);
@@ -72,10 +71,14 @@ export default function AssetDetail() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{asset.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{asset.name}</h1>
           <p className="mt-1 text-gray-500">{asset.description || "No description"}</p>
-          <p className="mt-2 text-sm">
-            <span className={`rounded px-2 py-1 ${asset.published ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
+          <p className="mt-3">
+            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+              asset.published
+                ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                : "bg-amber-50 border border-amber-200 text-amber-700"
+            }`}>
               {asset.published ? "Published to Catalog" : "Private (Team Only)"}
             </span>
           </p>
@@ -87,7 +90,7 @@ export default function AssetDetail() {
               <button
                 onClick={() => unpublishMut.mutate()}
                 disabled={unpublishMut.isPending}
-                className="rounded bg-yellow-600 px-3 py-1.5 text-sm text-white hover:bg-yellow-700"
+                className="rounded-lg bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600 transition-all duration-150 disabled:opacity-50"
               >
                 Unpublish
               </button>
@@ -95,14 +98,14 @@ export default function AssetDetail() {
               <button
                 onClick={() => publishMut.mutate()}
                 disabled={publishMut.isPending}
-                className="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
+                className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 transition-all duration-150 disabled:opacity-50"
               >
                 Publish
               </button>
             )}
             <button
               onClick={() => deleteMut.mutate()}
-              className="rounded bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+              className="rounded-lg bg-red-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-600 transition-all duration-150"
             >
               Delete
             </button>
@@ -110,7 +113,7 @@ export default function AssetDetail() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 rounded-lg border bg-white p-6 shadow-sm md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:grid-cols-3">
         <Field label="Source Type" value={asset.source_type} />
         <Field label="Owner" value={asset.owner_email} />
         <Field label="Freshness" value={asset.freshness} />
@@ -123,39 +126,39 @@ export default function AssetDetail() {
 
       {schemaColumns && (
         <div>
-          <h2 className="mb-3 text-lg font-semibold text-gray-700">
+          <h2 className="mb-3 text-lg font-semibold text-gray-800">
             Schema
             <span className="ml-2 text-sm font-normal text-gray-400">
               {schemaColumns.length} column{schemaColumns.length !== 1 ? "s" : ""}
             </span>
           </h2>
-          <div className="overflow-hidden rounded-lg border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-200">
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Column</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Type</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">Nullable</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Description</th>
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Column</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">Nullable</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
                 {schemaColumns.map((col, idx) => (
-                  <tr key={col.id ?? idx} className="hover:bg-gray-50">
-                    <td className="px-4 py-2.5 font-mono text-sm font-medium text-gray-800">{col.name}</td>
-                    <td className="px-4 py-2.5">
-                      <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
+                  <tr key={col.id ?? idx} className="hover:bg-fuchsia-100/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-sm font-medium text-gray-800">{col.name}</td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2 py-0.5 text-xs font-medium text-fuchsia-900">
                         {col.type || "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-center text-xs text-gray-500">
+                    <td className="px-4 py-3 text-center text-xs text-gray-500">
                       {col.nullable ? (
                         <span className="text-gray-400">nullable</span>
                       ) : (
-                        <span className="font-medium text-gray-700">required</span>
+                        <span className="font-semibold text-gray-700">required</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-gray-500">{col.description || "—"}</td>
+                    <td className="px-4 py-3 text-gray-500">{col.description || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -176,8 +179,8 @@ export default function AssetDetail() {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase text-gray-400">{label}</dt>
-      <dd className="mt-0.5 text-sm text-gray-800">{value || "—"}</dd>
+      <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</dt>
+      <dd className="mt-1 text-sm text-gray-800">{value || "—"}</dd>
     </div>
   );
 }

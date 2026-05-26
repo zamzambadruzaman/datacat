@@ -24,14 +24,14 @@ export default function AssetList({
         <Link
           key={a.id}
           to={`/assets/${a.id}`}
-          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm
-                     transition hover:border-indigo-300 hover:shadow"
+          className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm
+                     transition-all duration-150 hover:border-fuchsia-400 hover:shadow-md"
         >
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">{a.name}</h3>
             <div className="flex items-center gap-1.5">
               {a.source_type && (
-                <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2.5 py-0.5 text-xs font-medium text-fuchsia-900">
                   {a.source_type}
                 </span>
               )}
@@ -48,7 +48,7 @@ export default function AssetList({
               {a.tags.split(",").map((t) => (
                 <span
                   key={t}
-                  className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+                  className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
                 >
                   {t.trim()}
                 </span>
