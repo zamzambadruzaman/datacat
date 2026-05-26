@@ -1,12 +1,12 @@
 import uuid
 
 import duckdb
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.auth import get_current_user_optional, is_superadmin, is_superadmin_or_platform
-from app.auth_utils import hash_password
+from app.auth_utils import hash_password, verify_password
 from app.database import get_db
-from app.schemas import UserCreate, UserOut, UserTeamAssign, UserTeamMembership
+from app.schemas import UserCreate, UserOut, UserTeamAssign, UserTeamMembership, UserUpdate, PasswordChange
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -23,7 +23,15 @@ def _require_superadmin(user_email: str, db: duckdb.DuckDBPyConnection) -> None:
 
 
 def _row_to_user(row: tuple) -> UserOut:
-    return UserOut(id=row[0], email=row[1], is_superadmin=bool(row[2]), created_at=row[3])
+    # row: id, email, is_superadmin, name, avatar, created_at
+    return UserOut(
+        id=row[0],
+        email=row[1],
+        is_superadmin=bool(row[2]),
+        name=row[3] or "",
+        avatar=row[4] or "",
+        created_at=row[5],
+    )
 
 
 @router.get("/search")
@@ -46,19 +54,87 @@ def get_me(
     db: duckdb.DuckDBPyConnection = Depends(get_db),
     user_email: str | None = Depends(get_current_user_optional),
 ):
-    """Return the current user's profile including superadmin status."""
+    """Return the current user's profile including superadmin status and team memberships."""
     email = _require_auth(user_email)
     row = db.execute(
-        "SELECT id, email, is_superadmin, created_at FROM users WHERE email = ?", [email]
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users WHERE email = ?",
+        [email],
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="User not found")
+
+    memberships = db.execute(
+        "SELECT t.id, t.name, tm.role "
+        "FROM team_members tm JOIN teams t ON tm.team_id = t.id "
+        "WHERE tm.email = ? AND t.is_platform = FALSE ORDER BY t.name",
+        [email],
+    ).fetchall()
+
     return {
         "id": row[0],
         "email": row[1],
         "is_superadmin": bool(row[2]),
-        "created_at": row[3],
+        "name": row[3] or "",
+        "avatar": row[4] or "",
+        "created_at": row[5],
+        "teams": [{"team_id": m[0], "team_name": m[1], "role": m[2]} for m in memberships],
     }
+
+
+@router.put("/me")
+def update_me(
+    body: UserUpdate,
+    db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
+):
+    """Update the current user's display name."""
+    email = _require_auth(user_email)
+    db.execute("UPDATE users SET name = ? WHERE email = ?", [body.name.strip(), email])
+    row = db.execute(
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users WHERE email = ?",
+        [email],
+    ).fetchone()
+    return _row_to_user(row)
+
+
+@router.post("/me/avatar")
+async def update_avatar(
+    request: Request,
+    db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
+):
+    """Upload a profile picture. Accepts a JSON body with { avatar: '<data-url>' }."""
+    email = _require_auth(user_email)
+    body = await request.json()
+    avatar = body.get("avatar", "")
+    if avatar and not avatar.startswith("data:image/"):
+        raise HTTPException(status_code=400, detail="avatar must be a data: image URL")
+    db.execute("UPDATE users SET avatar = ? WHERE email = ?", [avatar, email])
+    row = db.execute(
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users WHERE email = ?",
+        [email],
+    ).fetchone()
+    return _row_to_user(row)
+
+
+@router.put("/me/password")
+def change_password(
+    body: PasswordChange,
+    db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
+):
+    """Change the current user's password after verifying the current one."""
+    email = _require_auth(user_email)
+    row = db.execute("SELECT password FROM users WHERE email = ?", [email]).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(body.current_password, row[0]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    db.execute(
+        "UPDATE users SET password = ? WHERE email = ?",
+        [hash_password(body.new_password), email],
+    )
+    return {"detail": "Password updated"}
 
 
 @router.get("", response_model=list[UserOut])
@@ -72,7 +148,7 @@ def list_users(
 
     # Fetch all users
     users = db.execute(
-        "SELECT id, email, is_superadmin, created_at FROM users ORDER BY created_at"
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users ORDER BY created_at"
     ).fetchall()
 
     # Fetch all non-platform team memberships in one query
@@ -94,8 +170,10 @@ def list_users(
             id=r[0],
             email=r[1],
             is_superadmin=bool(r[2]),
+            name=r[3] or "",
+            avatar=r[4] or "",
             teams=teams_by_email.get(r[1], []),
-            created_at=r[3],
+            created_at=r[5],
         )
         for r in users
     ]
@@ -120,7 +198,8 @@ def create_user(
         [user_id, body.email, hash_password(body.password)],
     )
     row = db.execute(
-        "SELECT id, email, is_superadmin, created_at FROM users WHERE id = ?", [user_id]
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users WHERE id = ?",
+        [user_id],
     ).fetchone()
     return _row_to_user(row)
 
@@ -148,7 +227,8 @@ def set_superadmin(
 
     db.execute("UPDATE users SET is_superadmin = ? WHERE id = ?", [promote, user_id])
     updated = db.execute(
-        "SELECT id, email, is_superadmin, created_at FROM users WHERE id = ?", [user_id]
+        "SELECT id, email, is_superadmin, name, avatar, created_at FROM users WHERE id = ?",
+        [user_id],
     ).fetchone()
     return _row_to_user(updated)
 

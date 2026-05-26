@@ -10,6 +10,15 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6)
 
 
+class UserUpdate(BaseModel):
+    name: str = Field(..., max_length=128)
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+
+
 class UserTeamMembership(BaseModel):
     team_id: str
     team_name: str
@@ -20,6 +29,8 @@ class UserOut(BaseModel):
     id: str
     email: str
     is_superadmin: bool = False
+    name: str = ""
+    avatar: str = ""
     teams: list[UserTeamMembership] = []
     created_at: datetime
 
