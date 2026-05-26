@@ -17,7 +17,9 @@ router = APIRouter(prefix="/api/teams", tags=["teams"])
 
 
 def _check_team_owner(team_id: str, user_email: str, db: duckdb.DuckDBPyConnection) -> None:
-    """Verify the user is an owner of the team."""
+    """Verify the user is an owner of the team (superadmins are implicitly owners)."""
+    if is_superadmin_or_platform(user_email, db):
+        return
     member = db.execute(
         "SELECT role FROM team_members WHERE team_id = ? AND email = ?",
         [team_id, user_email],
