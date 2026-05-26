@@ -165,6 +165,8 @@ export interface User {
   id: string;
   email: string;
   is_superadmin: boolean;
+  name: string;
+  avatar: string;
   teams: UserTeamMembership[];
   created_at: string;
 }
@@ -176,6 +178,18 @@ export const signup = (data: { email: string; password: string }) =>
   });
 
 export const fetchMe = () => apiFetch<User>("/users/me");
+
+export const updateMe = (data: { name: string }) =>
+  apiFetch<User>("/users/me", { method: "PUT", body: JSON.stringify(data) });
+
+export const uploadAvatar = (avatar: string) =>
+  apiFetch<User>("/users/me/avatar", { method: "POST", body: JSON.stringify({ avatar }) });
+
+export const changePassword = (data: { current_password: string; new_password: string }) =>
+  apiFetch<{ detail: string }>("/users/me/password", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
 
 export const searchUsers = (q: string) =>
   apiFetch<{ id: string; email: string }[]>(`/users/search?q=${encodeURIComponent(q)}`);

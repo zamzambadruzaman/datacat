@@ -84,14 +84,19 @@ def _init_tables(conn: duckdb.DuckDBPyConnection) -> None:
             email          VARCHAR NOT NULL UNIQUE,
             password       VARCHAR NOT NULL,
             is_superadmin  BOOLEAN DEFAULT FALSE,
+            name           VARCHAR DEFAULT '',
+            avatar         VARCHAR DEFAULT '',
             created_at     TIMESTAMP DEFAULT current_timestamp
         )
     """)
-    # Migration: add is_superadmin to existing databases that predate this column
-    # PRAGMA table_info returns (cid, name, type, notnull, dflt_value, pk)
+    # Migrations for databases that predate newer columns
     cols = [r[1] for r in conn.execute("PRAGMA table_info('users')").fetchall()]
     if "is_superadmin" not in cols:
         conn.execute("ALTER TABLE users ADD COLUMN is_superadmin BOOLEAN DEFAULT FALSE")
+    if "name" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN name VARCHAR DEFAULT ''")
+    if "avatar" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN avatar VARCHAR DEFAULT ''")
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:

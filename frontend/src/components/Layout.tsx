@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { fetchMe } from "../api";
 
 const mainNav = [
   { to: "/", label: "Home" },
@@ -19,6 +20,31 @@ export default function Layout({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("datacat_token");
   const userEmail = localStorage.getItem("datacat_user_email");
   const isSuperadmin = localStorage.getItem("datacat_is_superadmin") === "true";
+
+  const [avatar, setAvatar] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    fetchMe()
+      .then((u) => {
+        setAvatar(u.avatar || "");
+        setDisplayName(u.name || "");
+      })
+      .catch(() => {});
+  }, [token, pathname]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("datacat_token");
@@ -63,23 +89,75 @@ export default function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          {/* Right: badge + email + logout */}
+          {/* Right: badge + avatar/email + logout */}
           <div className="flex items-center gap-3 text-sm">
             {token ? (
               <>
-                <div className="hidden sm:flex items-center gap-2">
-                  {isSuperadmin && (
-                    <span className="rounded bg-amber-400 text-amber-900 px-1.5 py-0.5 text-xs font-semibold">
-                      superadmin
-                    </span>
-                  )}
-                  {userEmail && (
-                    <span className="opacity-75 text-sm">{userEmail}</span>
+                {/* User menu with hover/click dropdown */}
+                <div
+                  ref={dropdownRef}
+                  className="relative hidden sm:block"
+                  onMouseEnter={() => setDropdownOpen(true)}
+                  onMouseLeave={() => setDropdownOpen(false)}
+                >
+                  {/* Trigger */}
+                  <button
+                    onClick={() => setDropdownOpen((v) => !v)}
+                    className="flex items-center gap-2 hover:opacity-90 transition rounded px-1 py-0.5"
+                  >
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt="avatar"
+                        className="w-7 h-7 rounded-full object-cover border border-indigo-300"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-indigo-400 flex items-center justify-center text-white text-xs font-bold border border-indigo-300">
+                        {(displayName || userEmail || "?").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex flex-col leading-none text-left">
+                      {isSuperadmin && (
+                        <span className="rounded bg-amber-400 text-amber-900 px-1.5 py-0.5 text-xs font-semibold mb-0.5 self-start">
+                          superadmin
+                        </span>
+                      )}
+                      <span className="opacity-75 text-sm">{displayName || userEmail}</span>
+                    </div>
+                  </button>
+
+                  {/* Dropdown */}
+                  {dropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 text-gray-800">
+                      <Link
+                        to="/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50 transition"
+                      >
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9 9 0 1118.879 6.196 9 9 0 015.121 17.804z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Profile
+                      </Link>
+                      <div className="border-t border-gray-100 my-1" />
+                      <button
+                        onClick={() => { setDropdownOpen(false); handleLogout(); }}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                        </svg>
+                        Logout
+                      </button>
+                    </div>
                   )}
                 </div>
+
+                {/* Fallback logout for small screens */}
                 <button
                   onClick={handleLogout}
-                  className="rounded px-3 py-1 bg-indigo-800 hover:bg-indigo-900 transition"
+                  className="sm:hidden rounded px-3 py-1 bg-indigo-800 hover:bg-indigo-900 transition"
                 >
                   Logout
                 </button>
