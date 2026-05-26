@@ -75,10 +75,19 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center px-4 py-3 gap-2">
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 mr-5 group">
-            <div className="w-7 h-7 rounded-lg bg-fuchsia-800 flex items-center justify-center flex-shrink-0 group-hover:bg-fuchsia-900 transition-colors">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M4 7c0-1.657 3.582-3 8-3s8 1.343 8 3M4 7v5c0 1.657 3.582 3 8 3s8-1.343 8-3V7M4 12v5c0 1.657 3.582 3 8 3s8-1.343 8-3v-5" />
+            <div className="w-8 h-8 rounded-lg bg-fuchsia-800 flex items-center justify-center flex-shrink-0 group-hover:bg-fuchsia-900 transition-colors">
+              {/* Database with cat ears */}
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                {/* Left cat ear */}
+                <path d="M4 13L7 7L10 13" />
+                {/* Right cat ear */}
+                <path d="M14 13L17 7L20 13" />
+                {/* Cylinder top ellipse */}
+                <path d="M4 13c0 1.1 3.58 2 8 2s8-.9 8-2s-3.58-2-8-2s-8 .9-8 2z" />
+                {/* Cylinder body */}
+                <path d="M4 13v6c0 1.1 3.58 2 8 2s8-.9 8-2v-6" />
+                {/* Middle data line */}
+                <path d="M4 16.5c0 1.1 3.58 2 8 2s8-.9 8-2" />
               </svg>
             </div>
             <span className="text-2xl font-black tracking-tight text-fuchsia-800 group-hover:text-fuchsia-900 transition-colors">
