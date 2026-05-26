@@ -60,7 +60,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         to={to}
         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
           active
-            ? "bg-fuchsia-100 text-fuchsia-900 border border-fuchsia-300"
+            ? "bg-fuchsia-800 text-white shadow-sm"
             : "text-gray-500 hover:text-fuchsia-800 hover:bg-fuchsia-100"
         }`}
       >
@@ -118,7 +118,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                     )}
                     <div className="flex flex-col leading-none text-left">
                       {isSuperadmin && (
-                        <span className="rounded-full bg-amber-50 border border-amber-200 text-amber-700 px-1.5 py-0.5 text-xs font-semibold mb-0.5 self-start">
+                        <span className="rounded-full bg-fuchsia-900 text-fuchsia-100 px-1.5 py-0.5 text-xs font-semibold mb-0.5 self-start">
                           superadmin
                         </span>
                       )}
