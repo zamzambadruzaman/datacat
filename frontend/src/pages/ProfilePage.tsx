@@ -14,7 +14,7 @@ function Avatar({ src, name, email }: { src: string; name: string; email: string
     );
   }
   return (
-    <div className="w-24 h-24 rounded-full bg-indigo-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-md">
+    <div className="w-24 h-24 rounded-full bg-fuchsia-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-md">
       {initials}
     </div>
   );
@@ -128,7 +128,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   <input
                     autoFocus
-                    className="border border-indigo-400 rounded px-2 py-1 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+                    className="border border-fuchsia-400 rounded px-2 py-1 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-fuchsia-500 w-full"
                     value={nameVal}
                     onChange={(e) => setNameVal(e.target.value)}
                     onKeyDown={(e) => {
@@ -140,7 +140,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleNameSave}
                     disabled={nameMutation.isPending}
-                    className="text-sm px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 transition"
+                    className="text-sm px-3 py-1 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 disabled:opacity-50 transition"
                   >
                     Save
                   </button>
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                   </span>
                   <button
                     onClick={() => { setNameVal(user.name || ""); setNameEdit(true); }}
-                    className="opacity-0 group-hover/name:opacity-100 text-xs text-indigo-600 hover:text-indigo-800 transition"
+                    className="opacity-0 group-hover/name:opacity-100 text-xs text-fuchsia-600 hover:text-fuchsia-800 transition"
                   >
                     Edit
                   </button>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
             <p className="text-gray-500 text-sm">{user.email}</p>
 
             {user.is_superadmin && (
-              <span className="inline-block mt-1 rounded bg-amber-400 text-amber-900 px-2 py-0.5 text-xs font-semibold">
+              <span className="inline-block mt-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 text-xs font-semibold">
                 superadmin
               </span>
             )}
@@ -177,7 +177,7 @@ export default function ProfilePage() {
         </div>
 
         {avatarMutation.isPending && (
-          <p className="text-sm text-indigo-600 mt-3">Uploading avatar…</p>
+          <p className="text-sm text-fuchsia-600 mt-3">Uploading avatar…</p>
         )}
       </div>
 
@@ -191,7 +191,7 @@ export default function ProfilePage() {
             {user.teams.map((t) => (
               <li key={t.team_id} className="flex items-center justify-between py-2">
                 <span className="text-sm font-medium text-gray-800">{t.team_name}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 capitalize">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700 capitalize">
                   {t.role}
                 </span>
               </li>
@@ -209,7 +209,7 @@ export default function ProfilePage() {
             <input
               type="password"
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition"
               value={pwForm.current_password}
               onChange={(e) => setPwForm((f) => ({ ...f, current_password: e.target.value }))}
             />
@@ -220,7 +220,7 @@ export default function ProfilePage() {
               type="password"
               required
               minLength={6}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition"
               value={pwForm.new_password}
               onChange={(e) => setPwForm((f) => ({ ...f, new_password: e.target.value }))}
             />
@@ -230,7 +230,7 @@ export default function ProfilePage() {
             <input
               type="password"
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 transition"
               value={pwForm.confirm}
               onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))}
             />
