@@ -111,7 +111,7 @@ function newColumn(): SchemaColumn {
   return { id: crypto.randomUUID(), name: "", type: "", nullable: true, description: "" };
 }
 
-const inputCls = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20";
+const inputCls = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20";
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -274,7 +274,7 @@ export default function AssetForm() {
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">Schema</span>
               {filledColumns > 0 && (
-                <span className="rounded-full bg-fuchsia-50 border border-fuchsia-200 px-2 py-0.5 text-xs font-medium text-fuchsia-700">
+                <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2 py-0.5 text-xs font-medium text-fuchsia-900">
                   {filledColumns} column{filledColumns !== 1 ? "s" : ""}
                 </span>
               )}
@@ -292,7 +292,7 @@ export default function AssetForm() {
                 onClick={() => setSchemaTab("manual")}
                 className={`px-3 py-1.5 transition-colors ${
                   schemaTab === "manual"
-                    ? "bg-fuchsia-600 text-white"
+                    ? "bg-fuchsia-800 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -303,7 +303,7 @@ export default function AssetForm() {
                 onClick={() => setSchemaTab("yaml")}
                 className={`border-l px-3 py-1.5 transition-colors ${
                   schemaTab === "yaml"
-                    ? "bg-fuchsia-600 text-white"
+                    ? "bg-fuchsia-800 text-white"
                     : "bg-white text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -340,14 +340,14 @@ export default function AssetForm() {
                           value={col.name}
                           onChange={(e) => updateColumn(col.id, "name", e.target.value)}
                           placeholder="column_name"
-                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20"
+                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-700 focus:ring-1 focus:ring-fuchsia-700/20"
                         />
                       </td>
                       <td className="px-2 py-1.5">
                         <select
                           value={col.type}
                           onChange={(e) => updateColumn(col.id, "type", e.target.value)}
-                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20"
+                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-700 focus:ring-1 focus:ring-fuchsia-700/20"
                         >
                           <option value="">Select type…</option>
                           {col.type && !availableTypes.includes(col.type) && (
@@ -363,7 +363,7 @@ export default function AssetForm() {
                           type="checkbox"
                           checked={col.nullable}
                           onChange={(e) => updateColumn(col.id, "nullable", e.target.checked)}
-                          className="h-4 w-4 rounded border-gray-300 text-fuchsia-600 focus:ring-fuchsia-500"
+                          className="h-4 w-4 rounded border-gray-300 text-fuchsia-800 focus:ring-fuchsia-700"
                         />
                       </td>
                       <td className="px-2 py-1.5">
@@ -371,7 +371,7 @@ export default function AssetForm() {
                           value={col.description}
                           onChange={(e) => updateColumn(col.id, "description", e.target.value)}
                           placeholder="Optional description"
-                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20"
+                          className="w-full rounded-lg border border-gray-300 px-2 py-1 text-sm outline-none transition focus:border-fuchsia-700 focus:ring-1 focus:ring-fuchsia-700/20"
                         />
                       </td>
                       <td className="px-1 py-1.5 text-center">
@@ -393,7 +393,7 @@ export default function AssetForm() {
                 <button
                   type="button"
                   onClick={addColumn}
-                  className="text-sm font-medium text-fuchsia-600 hover:text-fuchsia-800 transition-colors"
+                  className="text-sm font-medium text-fuchsia-800 hover:text-fuchsia-800 transition-colors"
                 >
                   + Add Column
                 </button>
@@ -434,7 +434,7 @@ is_active: BOOLEAN`}</pre>
                   type="file"
                   accept=".yaml,.yml"
                   onChange={handleYamlUpload}
-                  className="block text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-fuchsia-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-fuchsia-700"
+                  className="block text-sm text-gray-500 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-fuchsia-800 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-fuchsia-900"
                 />
               </div>
 
@@ -461,7 +461,7 @@ is_active: BOOLEAN`}</pre>
         <button
           onClick={() => mutation.mutate()}
           disabled={!form.name || !form.domain_id || mutation.isPending}
-          className="w-full rounded-lg bg-fuchsia-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150 shadow-sm"
+          className="w-full rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm"
         >
           {mutation.isPending ? "Creating..." : "Register Asset"}
         </button>

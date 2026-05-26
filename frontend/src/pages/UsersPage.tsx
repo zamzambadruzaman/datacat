@@ -43,14 +43,14 @@ function AssignTeamForm({
       <select
         value={teamId}
         onChange={(e) => setTeamId(e.target.value)}
-        className="rounded-lg border border-gray-300 px-2 py-1 text-xs transition focus:border-fuchsia-500 focus:outline-none"
+        className="rounded-lg border border-gray-300 px-2 py-1 text-xs transition focus:border-fuchsia-700 focus:outline-none"
       >
         {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
       <select
         value={role}
         onChange={(e) => setRole(e.target.value)}
-        className="rounded-lg border border-gray-300 px-2 py-1 text-xs transition focus:border-fuchsia-500 focus:outline-none"
+        className="rounded-lg border border-gray-300 px-2 py-1 text-xs transition focus:border-fuchsia-700 focus:outline-none"
       >
         <option value="member">member</option>
         <option value="manager">manager</option>
@@ -58,7 +58,7 @@ function AssignTeamForm({
       <button
         type="submit"
         disabled={mut.isPending}
-        className="rounded-lg bg-fuchsia-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150"
+        className="rounded-lg bg-fuchsia-800 px-2.5 py-1 text-xs font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
       >
         {mut.isPending ? "…" : "Assign"}
       </button>
@@ -139,18 +139,18 @@ export default function UsersPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder="user@example.com" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder="Min. 6 characters" />
             </div>
             {formError && <p className="text-red-500 text-sm">{formError}</p>}
             <button type="submit" disabled={createMut.isPending}
-              className="rounded-lg bg-fuchsia-600 text-white px-4 py-1.5 text-sm font-medium hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150">
+              className="rounded-lg bg-fuchsia-800 text-white px-4 py-1.5 text-sm font-medium hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150">
               {createMut.isPending ? "Creating…" : "Create user"}
             </button>
           </form>
@@ -175,7 +175,7 @@ export default function UsersPage() {
             {users.map((u: User) => {
               const isSelf = u.email === currentEmail;
               return (
-                <tr key={u.id} className="border-t border-gray-100 hover:bg-fuchsia-50/20 align-top transition-colors">
+                <tr key={u.id} className="border-t border-gray-100 hover:bg-fuchsia-100/20 align-top transition-colors">
                   <td className="px-4 py-3 font-mono text-sm">{u.email}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1 items-center">
@@ -187,7 +187,7 @@ export default function UsersPage() {
                           className={`text-xs underline transition-colors ${
                             u.is_superadmin
                               ? "text-red-400 hover:text-red-600"
-                              : "text-fuchsia-400 hover:text-fuchsia-600"
+                              : "text-fuchsia-600 hover:text-fuchsia-800"
                           }`}
                         >
                           {u.is_superadmin ? "revoke" : "promote"}
@@ -203,7 +203,7 @@ export default function UsersPage() {
                       {(u.teams ?? []).map((tm: UserTeamMembership) => (
                         <span
                           key={tm.team_id}
-                          className="inline-flex items-center gap-1 rounded-full bg-fuchsia-50 border border-fuchsia-200 px-2 py-0.5 text-xs text-fuchsia-700"
+                          className="inline-flex items-center gap-1 rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2 py-0.5 text-xs text-fuchsia-900"
                         >
                           <span className="font-medium">{tm.team_name}</span>
                           <span className={`rounded-full px-1 text-[10px] font-semibold ${
@@ -215,7 +215,7 @@ export default function UsersPage() {
                             <button
                               title={`Remove from ${tm.team_name}`}
                               onClick={() => removeTeamMut.mutate({ userId: u.id, teamId: tm.team_id })}
-                              className="ml-0.5 text-fuchsia-300 hover:text-red-500 leading-none transition-colors"
+                              className="ml-0.5 text-fuchsia-400 hover:text-red-500 leading-none transition-colors"
                             >
                               ×
                             </button>
@@ -235,7 +235,7 @@ export default function UsersPage() {
                       ) : (
                         <button
                           onClick={() => setAssigningUserId(u.id)}
-                          className="text-xs text-fuchsia-500 hover:text-fuchsia-700 underline transition-colors"
+                          className="text-xs text-fuchsia-700 hover:text-fuchsia-900 underline transition-colors"
                         >
                           + assign
                         </button>

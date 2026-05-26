@@ -93,7 +93,7 @@ export default function LoginPage() {
     <div className="max-w-md mx-auto mt-16">
       {/* Brand mark */}
       <div className="text-center mb-8">
-        <span className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 to-fuchsia-700 bg-clip-text text-transparent">
+        <span className="text-3xl font-bold bg-gradient-to-r from-fuchsia-700 to-fuchsia-900 bg-clip-text text-transparent">
           datacat
         </span>
         <p className="mt-1 text-sm text-gray-500">Your lightweight data catalog</p>
@@ -109,7 +109,7 @@ export default function LoginPage() {
               onClick={() => { setTab(t); reset(); }}
               className={`flex-1 py-3 text-sm font-medium capitalize transition-all duration-150 ${
                 tab === t
-                  ? "border-b-2 border-fuchsia-600 text-fuchsia-600 bg-fuchsia-50/50"
+                  ? "border-b-2 border-fuchsia-800 text-fuchsia-800 bg-fuchsia-100/50"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -127,7 +127,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-700 focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder="you@example.com"
               />
             </div>
@@ -138,7 +138,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-700 focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder={tab === "signup" ? "Min. 6 characters" : ""}
               />
             </div>
@@ -150,7 +150,7 @@ export default function LoginPage() {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/20"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm transition focus:outline-none focus:border-fuchsia-700 focus:ring-2 focus:ring-fuchsia-700/20"
                 />
               </div>
             )}
@@ -162,7 +162,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-fuchsia-600 text-white py-2.5 text-sm font-semibold hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150 shadow-sm hover:shadow-fuchsia-200 hover:shadow-md"
+              className="w-full rounded-lg bg-fuchsia-800 text-white py-2.5 text-sm font-semibold hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm hover:shadow-fuchsia-300 hover:shadow-md"
             >
               {loading
                 ? "Please wait…"

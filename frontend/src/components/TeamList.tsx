@@ -43,7 +43,7 @@ export default function TeamList() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
             />
           </div>
           <div>
@@ -52,14 +52,14 @@ export default function TeamList() {
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
             />
           </div>
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={!name || createMut.isPending}
-              className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150"
+              className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
             >
               Create Team
             </button>
@@ -75,7 +75,7 @@ export default function TeamList() {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-700 transition-all duration-150 shadow-sm"
+          className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150 shadow-sm"
         >
           + New Team
         </button>
@@ -89,7 +89,7 @@ export default function TeamList() {
             <Link
               to={`/teams/${team.id}`}
               key={team.id}
-              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:border-fuchsia-300 hover:shadow-md transition-all duration-150"
+              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:border-fuchsia-400 hover:shadow-md transition-all duration-150"
             >
               <h2 className="text-lg font-semibold text-gray-800">{team.name}</h2>
               <p className="mt-2 text-sm text-gray-500">{team.description}</p>

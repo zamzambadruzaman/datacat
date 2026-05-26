@@ -25,13 +25,13 @@ export default function AssetList({
           key={a.id}
           to={`/assets/${a.id}`}
           className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm
-                     transition-all duration-150 hover:border-fuchsia-300 hover:shadow-md"
+                     transition-all duration-150 hover:border-fuchsia-400 hover:shadow-md"
         >
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">{a.name}</h3>
             <div className="flex items-center gap-1.5">
               {a.source_type && (
-                <span className="rounded-full bg-fuchsia-50 border border-fuchsia-200 px-2.5 py-0.5 text-xs font-medium text-fuchsia-700">
+                <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2.5 py-0.5 text-xs font-medium text-fuchsia-900">
                   {a.source_type}
                 </span>
               )}

@@ -33,7 +33,7 @@ export default function HomePage() {
           <h2 className="text-lg font-semibold text-gray-800">Recent Assets</h2>
           <Link
             to="/assets/new"
-            className="text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700 transition-colors"
+            className="text-sm font-medium text-fuchsia-800 hover:text-fuchsia-900 transition-colors"
           >
             + Register asset
           </Link>
@@ -46,11 +46,11 @@ export default function HomePage() {
               <Link
                 key={a.id}
                 to={`/assets/${a.id}`}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 text-sm shadow-sm hover:border-fuchsia-300 hover:shadow-md transition-all duration-150"
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 text-sm shadow-sm hover:border-fuchsia-400 hover:shadow-md transition-all duration-150"
               >
                 <span className="font-medium text-gray-800">{a.name}</span>
                 {a.source_type && (
-                  <span className="rounded-full bg-fuchsia-50 border border-fuchsia-200 px-2.5 py-0.5 text-xs font-medium text-fuchsia-700">
+                  <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2.5 py-0.5 text-xs font-medium text-fuchsia-900">
                     {a.source_type}
                   </span>
                 )}
@@ -67,9 +67,9 @@ function StatCard({ label, value, to }: { label: string; value: number; to: stri
   return (
     <Link
       to={to}
-      className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm transition-all duration-150 hover:border-fuchsia-300 hover:shadow-md group"
+      className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm transition-all duration-150 hover:border-fuchsia-400 hover:shadow-md group"
     >
-      <div className="text-3xl font-bold text-fuchsia-600 group-hover:text-fuchsia-700 transition-colors">
+      <div className="text-3xl font-bold text-fuchsia-800 group-hover:text-fuchsia-900 transition-colors">
         {value}
       </div>
       <div className="mt-1 text-sm text-gray-500">{label}</div>

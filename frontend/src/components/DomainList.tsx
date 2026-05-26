@@ -45,7 +45,7 @@ export default function DomainList() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
               <input
                 value={name} onChange={(e) => setName(e.target.value)} required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder="e.g. Customer Analytics"
               />
             </div>
@@ -53,7 +53,7 @@ export default function DomainList() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
               <input
                 value={description} onChange={(e) => setDescription(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
                 placeholder="Optional"
               />
             </div>
@@ -61,7 +61,7 @@ export default function DomainList() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Team</label>
               <select
                 value={teamId} onChange={(e) => setTeamId(e.target.value)} required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
               >
                 <option value="">Select a team…</option>
                 {manageableTeams.map((t: Team) => (
@@ -72,7 +72,7 @@ export default function DomainList() {
             {addError && <p className="text-sm text-red-500">{addError}</p>}
             <div className="flex gap-2">
               <button type="submit" disabled={!name || !teamId || addMut.isPending}
-                className="rounded-lg bg-fuchsia-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150">
+                className="rounded-lg bg-fuchsia-800 px-4 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150">
                 {addMut.isPending ? "Creating…" : "Create"}
               </button>
               <button type="button" onClick={() => { setShowForm(false); setAddError(""); }}
@@ -83,7 +83,7 @@ export default function DomainList() {
           </form>
         ) : (
           <button onClick={() => setShowForm(true)}
-            className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-700 transition-all duration-150 shadow-sm">
+            className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150 shadow-sm">
             + New domain
           </button>
         )
@@ -97,7 +97,7 @@ export default function DomainList() {
             const team = teams.find((t: Team) => t.id === d.team_id);
             return (
               <div key={d.id}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-fuchsia-200 transition-all duration-150">
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-fuchsia-300 transition-all duration-150">
                 <div>
                   <h3 className="font-semibold text-gray-800">{d.name}</h3>
                   <p className="text-xs text-gray-400 mt-0.5">

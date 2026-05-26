@@ -11,7 +11,7 @@ function RoleBadge({ role }: { role: string }) {
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
       isManager
-        ? "bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700"
+        ? "bg-fuchsia-100 border border-fuchsia-300 text-fuchsia-900"
         : "bg-gray-100 border border-gray-200 text-gray-600"
     }`}>
       {isManager ? "manager" : "member"}
@@ -83,7 +83,7 @@ export default function TeamDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/teams" className="inline-flex items-center text-sm font-medium text-fuchsia-600 hover:text-fuchsia-700 transition-colors">
+      <Link to="/teams" className="inline-flex items-center text-sm font-medium text-fuchsia-800 hover:text-fuchsia-900 transition-colors">
         ← Back to Teams
       </Link>
 
@@ -114,7 +114,7 @@ export default function TeamDetail() {
                 className={`w-full rounded-lg border px-3 py-1.5 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${
                   noUserFound
                     ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-                    : "border-gray-300 focus:border-fuchsia-500 focus:ring-fuchsia-500/20"
+                    : "border-gray-300 focus:border-fuchsia-700 focus:ring-fuchsia-700/20"
                 }`}
               />
 
@@ -124,7 +124,7 @@ export default function TeamDetail() {
                     <li
                       key={s.id}
                       onMouseDown={() => { setNewEmail(s.email); setShowSuggestions(false); }}
-                      className="cursor-pointer px-3 py-2 hover:bg-fuchsia-50 font-mono transition-colors"
+                      className="cursor-pointer px-3 py-2 hover:bg-fuchsia-100 font-mono transition-colors"
                     >
                       {s.email}
                     </li>
@@ -142,7 +142,7 @@ export default function TeamDetail() {
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as Role)}
-              className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm shadow-sm transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+              className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm shadow-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
             >
               <option value="member">Member</option>
               <option value="manager">Manager</option>
@@ -150,7 +150,7 @@ export default function TeamDetail() {
             <button
               type="submit"
               disabled={!exactMatch || addMut.isPending}
-              className="rounded-lg bg-fuchsia-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150"
+              className="rounded-lg bg-fuchsia-800 px-4 py-1.5 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
             >
               {addMut.isPending ? "Adding…" : "Add"}
             </button>
@@ -175,14 +175,14 @@ export default function TeamDetail() {
               </tr>
             )}
             {members.map((m: TeamMember) => (
-              <tr key={m.id} className="hover:bg-fuchsia-50/20 transition-colors">
+              <tr key={m.id} className="hover:bg-fuchsia-100/20 transition-colors">
                 <td className="px-5 py-3 text-gray-800 font-mono">{m.email}</td>
                 <td className="px-5 py-3">
                   {isManager && m.email !== currentEmail ? (
                     <select
                       value={m.role === "owner" ? "manager" : m.role}
                       onChange={(e) => roleMut.mutate({ email: m.email, role: e.target.value })}
-                      className="rounded-lg border border-gray-300 px-2 py-0.5 text-xs transition focus:border-fuchsia-500 focus:outline-none focus:ring-1 focus:ring-fuchsia-500/20"
+                      className="rounded-lg border border-gray-300 px-2 py-0.5 text-xs transition focus:border-fuchsia-700 focus:outline-none focus:ring-1 focus:ring-fuchsia-700/20"
                     >
                       <option value="member">member</option>
                       <option value="manager">manager</option>

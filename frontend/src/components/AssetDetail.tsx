@@ -144,10 +144,10 @@ export default function AssetDetail() {
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
                 {schemaColumns.map((col, idx) => (
-                  <tr key={col.id ?? idx} className="hover:bg-fuchsia-50/30 transition-colors">
+                  <tr key={col.id ?? idx} className="hover:bg-fuchsia-100/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-sm font-medium text-gray-800">{col.name}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-fuchsia-50 border border-fuchsia-200 px-2 py-0.5 text-xs font-medium text-fuchsia-700">
+                      <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2 py-0.5 text-xs font-medium text-fuchsia-900">
                         {col.type || "—"}
                       </span>
                     </td>

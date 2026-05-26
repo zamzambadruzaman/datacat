@@ -12,7 +12,7 @@ export default function AssetsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Assets</h1>
         <Link
           to="/assets/new"
-          className="rounded-lg bg-fuchsia-600 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-700 transition-all duration-150 shadow-sm"
+          className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150 shadow-sm"
         >
           + Register Asset
         </Link>

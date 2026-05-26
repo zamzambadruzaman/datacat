@@ -60,8 +60,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         to={to}
         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
           active
-            ? "bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200"
-            : "text-gray-500 hover:text-fuchsia-600 hover:bg-fuchsia-50"
+            ? "bg-fuchsia-100 text-fuchsia-900 border border-fuchsia-300"
+            : "text-gray-500 hover:text-fuchsia-800 hover:bg-fuchsia-100"
         }`}
       >
         {label}
@@ -74,7 +74,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <nav className="bg-white border-b border-gray-200 shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center px-4 py-3 gap-2">
           {/* Brand */}
-          <Link to="/" className="text-xl font-bold tracking-tight mr-4 text-fuchsia-600">
+          <Link to="/" className="text-xl font-bold tracking-tight mr-4 text-fuchsia-800">
             datacat
           </Link>
 
@@ -103,16 +103,16 @@ export default function Layout({ children }: { children: ReactNode }) {
                 >
                   <button
                     onClick={() => setDropdownOpen((v) => !v)}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-fuchsia-50 transition-all duration-150"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-fuchsia-100 transition-all duration-150"
                   >
                     {avatar ? (
                       <img
                         src={avatar}
                         alt="avatar"
-                        className="w-7 h-7 rounded-full object-cover border border-fuchsia-200"
+                        className="w-7 h-7 rounded-full object-cover border border-fuchsia-300"
                       />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-fuchsia-100 flex items-center justify-center text-fuchsia-700 text-xs font-bold border border-fuchsia-200">
+                      <div className="w-7 h-7 rounded-full bg-fuchsia-200 flex items-center justify-center text-fuchsia-900 text-xs font-bold border border-fuchsia-300">
                         {(displayName || userEmail || "?").slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -132,7 +132,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                       <Link
                         to="/profile"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-fuchsia-50 hover:text-fuchsia-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-fuchsia-100 hover:text-fuchsia-900 transition-colors"
                       >
                         <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A9 9 0 1118.879 6.196 9 9 0 015.121 17.804z" />
@@ -157,7 +157,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 {/* Fallback logout for small screens */}
                 <button
                   onClick={handleLogout}
-                  className="sm:hidden rounded-lg px-3 py-1.5 text-sm font-medium border border-gray-200 text-gray-600 hover:border-fuchsia-300 hover:text-fuchsia-600 transition-all duration-150"
+                  className="sm:hidden rounded-lg px-3 py-1.5 text-sm font-medium border border-gray-200 text-gray-600 hover:border-fuchsia-400 hover:text-fuchsia-800 transition-all duration-150"
                 >
                   Logout
                 </button>
@@ -167,8 +167,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                 to="/login"
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
                   pathname === "/login"
-                    ? "bg-fuchsia-600 text-white"
-                    : "border border-gray-200 text-gray-600 hover:border-fuchsia-300 hover:text-fuchsia-600"
+                    ? "bg-fuchsia-800 text-white"
+                    : "border border-gray-200 text-gray-600 hover:border-fuchsia-400 hover:text-fuchsia-800"
                 }`}
               >
                 Login

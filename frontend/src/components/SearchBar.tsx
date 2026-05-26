@@ -19,7 +19,7 @@ export default function SearchBar({
       }}
       placeholder={placeholder}
       className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm
-                 transition focus:border-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20"
+                 transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
     />
   );
 }
