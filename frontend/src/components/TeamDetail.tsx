@@ -87,11 +87,11 @@ export default function TeamDetail() {
         ← Back to Teams
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900">Team Members</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">Team Members</h1>
 
       {isManager && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-800 mb-3">Add member</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="font-display text-lg font-bold text-gray-800 mb-3">Add member</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -111,7 +111,7 @@ export default function TeamDetail() {
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                 autoComplete="off"
-                className={`w-full rounded-lg border px-3 py-1.5 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-lg border px-3 py-1.5 text-sm transition focus:outline-none focus:ring-2 ${
                   noUserFound
                     ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
                     : "border-gray-300 focus:border-fuchsia-700 focus:ring-fuchsia-700/20"
@@ -142,7 +142,7 @@ export default function TeamDetail() {
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as Role)}
-              className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm shadow-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
+              className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm transition focus:border-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-700/20"
             >
               <option value="member">Member</option>
               <option value="manager">Manager</option>
@@ -159,7 +159,7 @@ export default function TeamDetail() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>

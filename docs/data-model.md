@@ -11,6 +11,7 @@ teams 1──────* team_members
 teams 1──────* domains
 domains 1────* assets
 assets 1─────* access_requests
+data_layers 1*── assets  (assets.layer_id, nullable)
 users (standalone — linked to teams via team_members.email)
 ```
 
@@ -90,6 +91,7 @@ A data asset (table, view, stream, file, or API) registered in the catalog.
 | `quality_score` | `DOUBLE` | Nullable | 0.0–1.0 quality indicator |
 | `freshness` | `VARCHAR` | Default `''` | e.g. `real-time`, `hourly`, `daily`, `weekly`, `monthly` |
 | `published` | `BOOLEAN` | Default `FALSE` | Draft by default; managers explicitly publish |
+| `layer_id` | `VARCHAR` | Nullable, FK → `data_layers.id` | Optional data-layer classification; `NULL` = unclassified |
 | `created_at` | `TIMESTAMP` | Default `now()` | |
 | `updated_at` | `TIMESTAMP` | Default `now()` | Updated on every PUT |
 
@@ -101,6 +103,22 @@ A data asset (table, view, stream, file, or API) registered in the catalog.
   { "name": "fare_usd",     "type": "DECIMAL", "nullable": true,  "description": "Ticket price in USD" }
 ]
 ```
+
+---
+
+### `data_layers`
+
+Configurable data-layer classifications (medallion-style: landing → bronze → silver → gold). Superadmins can add, rename, recolor, and remove layers; assets reference a layer via `assets.layer_id`.
+
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | `VARCHAR` | PK | UUID |
+| `name` | `VARCHAR` | UNIQUE, NOT NULL | Layer name (e.g. `bronze`) |
+| `color` | `VARCHAR` | Default `'#9CA3AF'` | Hex color used for badges/icons |
+| `position` | `INTEGER` | Default `0` | Sort order in the UI |
+| `created_at` | `TIMESTAMP` | Default `now()` | |
+
+> Four default layers — **landing, bronze, silver, gold** — are seeded on first startup when the table is empty. Deleting a layer sets `layer_id = NULL` on any assets that referenced it (assets are unclassified, never deleted).
 
 ---
 
@@ -144,3 +162,4 @@ Stores credentials for all registered accounts.
 - `users.is_superadmin` — added in v0.2
 - `users.name` — added in v0.2
 - `users.avatar` — added in v0.3
+- `assets.layer_id` — added with the Data Classification feature (`data_layers` table + default-layer seed)

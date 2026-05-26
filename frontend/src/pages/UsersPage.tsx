@@ -125,13 +125,13 @@ export default function UsersPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">Users</h1>
         {isSuperadmin && <SuperadminBadge />}
       </div>
 
       {isSuperadmin && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm max-w-md">
-          <h2 className="text-base font-semibold text-gray-800 mb-3">Add user</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-5 max-w-md">
+          <h2 className="font-display text-lg font-bold text-gray-800 mb-3">Add user</h2>
           <form
             onSubmit={(e) => { e.preventDefault(); createMut.mutate({ email: email.trim(), password }); }}
             className="space-y-3"
@@ -157,7 +157,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>

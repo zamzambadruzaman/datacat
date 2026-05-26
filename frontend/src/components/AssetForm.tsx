@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createAsset, fetchDomains, Domain } from "../api";
+import { createAsset, fetchDomains, fetchLayers, Domain } from "../api";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,6 +119,7 @@ export default function AssetForm() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains });
+  const { data: layers } = useQuery({ queryKey: ["layers"], queryFn: fetchLayers });
 
   const [form, setForm] = useState({
     domain_id: "",
@@ -129,6 +130,7 @@ export default function AssetForm() {
     tags: "",
     owner_email: "",
     freshness: "",
+    layer_id: "",
   });
 
   const [columns, setColumns] = useState<SchemaColumn[]>([newColumn()]);
@@ -147,7 +149,7 @@ export default function AssetForm() {
       const schema = columns
         .filter((c) => c.name.trim())
         .map(({ id: _id, ...rest }) => rest);
-      return createAsset({ ...form, schema_json: JSON.stringify(schema) });
+      return createAsset({ ...form, layer_id: form.layer_id || null, schema_json: JSON.stringify(schema) });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["assets"] });
@@ -196,9 +198,9 @@ export default function AssetForm() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Register New Asset</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">Register New Asset</h1>
 
-      <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6">
 
         {/* ── Metadata fields ── */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -253,6 +255,16 @@ export default function AssetForm() {
               <option value="">Select...</option>
               {["real-time", "hourly", "daily", "weekly", "monthly"].map((f) => (
                 <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">Data Layer</span>
+            <select value={form.layer_id} onChange={set("layer_id")} className={`mt-1.5 ${inputCls}`}>
+              <option value="">Unclassified</option>
+              {layers?.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </select>
           </label>
@@ -461,7 +473,7 @@ is_active: BOOLEAN`}</pre>
         <button
           onClick={() => mutation.mutate()}
           disabled={!form.name || !form.domain_id || mutation.isPending}
-          className="w-full rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm"
+          className="w-full rounded-lg bg-fuchsia-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
         >
           {mutation.isPending ? "Creating..." : "Register Asset"}
         </button>

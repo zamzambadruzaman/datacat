@@ -38,9 +38,9 @@ export default function DomainList() {
         showForm ? (
           <form
             onSubmit={(e) => { e.preventDefault(); addMut.mutate(); }}
-            className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3 max-w-lg"
+            className="rounded-xl border border-gray-200 bg-white p-5 space-y-3 max-w-lg"
           >
-            <h2 className="font-semibold text-gray-800">New domain</h2>
+            <h2 className="font-display text-lg font-bold text-gray-800">New domain</h2>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
               <input
@@ -83,7 +83,7 @@ export default function DomainList() {
           </form>
         ) : (
           <button onClick={() => setShowForm(true)}
-            className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150 shadow-sm">
+            className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150">
             + New domain
           </button>
         )
@@ -97,7 +97,7 @@ export default function DomainList() {
             const team = teams.find((t: Team) => t.id === d.team_id);
             return (
               <div key={d.id}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-fuchsia-300 transition-all duration-150">
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 hover:border-fuchsia-300 transition-all duration-150">
                 <div>
                   <h3 className="font-semibold text-gray-800">{d.name}</h3>
                   <p className="text-xs text-gray-400 mt-0.5">

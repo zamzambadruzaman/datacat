@@ -90,10 +90,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-16">
+    <div className="max-w-md mx-auto mt-16 animate-fade-up">
       {/* Brand mark */}
       <div className="text-center mb-8">
-        <span className="text-3xl font-bold bg-gradient-to-r from-fuchsia-700 to-fuchsia-900 bg-clip-text text-transparent">
+        <span className="font-display text-4xl font-black tracking-tight bg-gradient-to-r from-fuchsia-700 to-fuchsia-900 bg-clip-text text-transparent">
           datacat
         </span>
         <p className="mt-1 text-sm text-gray-500">Your lightweight data catalog</p>
@@ -162,7 +162,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-fuchsia-800 text-white py-2.5 text-sm font-semibold hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm hover:shadow-fuchsia-300 hover:shadow-md"
+              className="w-full rounded-lg bg-fuchsia-800 text-white py-2.5 text-sm font-semibold hover:bg-fuchsia-900 disabled:opacity-50 transition-colors duration-150"
             >
               {loading
                 ? "Please wait…"

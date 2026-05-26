@@ -70,6 +70,7 @@ Token expiry is controlled by `JWT_EXPIRE_MINUTES` (default: 60 minutes).
 | Assets (published) | All | Team's domains | Visible via public `/api/assets` |
 | Assets (unpublished) | All | Team's domains only | Hidden |
 | Users | All | Own profile only | 401 |
+| Data layers | Read all; manage | Read all | 401 |
 | Access requests | All | Own team's assets | Own requests only |
 
 > **Public asset browsing:** `GET /api/assets` (no auth) returns only **published** assets. Unpublished assets are invisible to non-members.
@@ -88,6 +89,8 @@ Token expiry is controlled by `JWT_EXPIRE_MINUTES` (default: 60 minutes).
 | Create / edit / delete domain | ❌ | ✅ | ✅ | ✅ |
 | Add / remove team members | ❌ | ✅ | ✅ | ✅ |
 | Update / delete team | ❌ | ❌ | ✅ | ✅ |
+| Classify asset into a data layer | ✅ | ✅ | ✅ | ✅ |
+| Add / rename / remove data layers | ❌ | ❌ | ❌ | ✅ |
 | Manage all users | ❌ | ❌ | ❌ | ✅ |
 | Promote / demote superadmin | ❌ | ❌ | ❌ | ✅ |
 | Delete any team (ownerless) | ❌ | ❌ | ❌ | ✅ |

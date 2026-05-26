@@ -25,7 +25,7 @@ export default function TeamList() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">Teams</h1>
 
       {showForm ? (
         <form
@@ -33,9 +33,9 @@ export default function TeamList() {
             e.preventDefault();
             createMut.mutate();
           }}
-          className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm max-w-lg"
+          className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 max-w-lg"
         >
-          <h2 className="font-semibold text-gray-800">New team</h2>
+          <h2 className="font-display text-lg font-bold text-gray-800">New team</h2>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Team Name</label>
             <input
@@ -75,7 +75,7 @@ export default function TeamList() {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150 shadow-sm"
+          className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 transition-all duration-150"
         >
           + New Team
         </button>
@@ -89,9 +89,9 @@ export default function TeamList() {
             <Link
               to={`/teams/${team.id}`}
               key={team.id}
-              className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:border-fuchsia-400 hover:shadow-md transition-all duration-150"
+              className="rounded-xl border border-gray-200 bg-white p-6 hover:border-fuchsia-400 transition-all duration-150"
             >
-              <h2 className="text-lg font-semibold text-gray-800">{team.name}</h2>
+              <h2 className="font-display text-lg font-bold text-gray-800">{team.name}</h2>
               <p className="mt-2 text-sm text-gray-500">{team.description}</p>
             </Link>
           ))}

@@ -102,10 +102,10 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">Profile</h1>
 
       {/* Avatar + identity */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex items-center gap-6">
           <div className="relative group cursor-pointer" onClick={() => fileRef.current?.click()}>
             <Avatar src={user.avatar} name={user.name} email={user.email} />
@@ -182,8 +182,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Team memberships */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-base font-semibold text-gray-700 mb-4">Teams</h2>
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="font-display text-lg font-bold text-gray-800 mb-4">Teams</h2>
         {user.teams.length === 0 ? (
           <p className="text-gray-400 text-sm">You are not a member of any team.</p>
         ) : (
@@ -201,8 +201,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Change password */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-base font-semibold text-gray-700 mb-4">Change Password</h2>
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="font-display text-lg font-bold text-gray-800 mb-4">Change Password</h2>
         <form onSubmit={handlePwSubmit} className="space-y-4 max-w-sm">
           <div>
             <label className="block text-sm text-gray-600 mb-1">Current password</label>

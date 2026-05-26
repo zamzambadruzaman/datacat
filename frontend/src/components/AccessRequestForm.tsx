@@ -25,7 +25,7 @@ export default function AccessRequestForm({ assetId }: { assetId: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-xl border border-gray-200 bg-white p-5">
       <h3 className="text-base font-semibold text-gray-800">Request Access</h3>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Email</label>
@@ -49,7 +49,7 @@ export default function AccessRequestForm({ assetId }: { assetId: string }) {
       <button
         type="submit"
         disabled={mutation.isPending}
-        className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150 shadow-sm"
+        className="rounded-lg bg-fuchsia-800 px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-900 disabled:opacity-50 transition-all duration-150"
       >
         {mutation.isPending ? "Sending…" : "Send Request"}
       </button>

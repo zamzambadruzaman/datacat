@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAsset, deleteAsset, publishAsset, unpublishAsset, fetchTeamMembers, getUserEmail } from "../api";
+import { fetchAsset, deleteAsset, publishAsset, unpublishAsset, fetchTeamMembers, fetchLayers, getUserEmail } from "../api";
 import AccessRequestForm from "./AccessRequestForm";
+import LayerBadge from "./LayerBadge";
 import { type SchemaColumn } from "./AssetForm";
 
 export default function AssetDetail() {
@@ -20,6 +21,9 @@ export default function AssetDetail() {
     queryFn: () => fetchTeamMembers(asset!.team_id!),
     enabled: !!asset?.team_id,
   });
+
+  const { data: layers } = useQuery({ queryKey: ["layers"], queryFn: fetchLayers });
+  const assetLayer = layers?.find((l) => l.id === asset?.layer_id);
 
   const deleteMut = useMutation({
     mutationFn: () => deleteAsset(id!),
@@ -71,9 +75,9 @@ export default function AssetDetail() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{asset.name}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-gray-900">{asset.name}</h1>
           <p className="mt-1 text-gray-500">{asset.description || "No description"}</p>
-          <p className="mt-3">
+          <div className="mt-3 flex items-center gap-2">
             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
               asset.published
                 ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
@@ -81,7 +85,8 @@ export default function AssetDetail() {
             }`}>
               {asset.published ? "Published to Catalog" : "Private (Team Only)"}
             </span>
-          </p>
+            {assetLayer && <LayerBadge layer={assetLayer} />}
+          </div>
         </div>
 
         {canManage && (
@@ -113,7 +118,7 @@ export default function AssetDetail() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6 md:grid-cols-3">
         <Field label="Source Type" value={asset.source_type} />
         <Field label="Owner" value={asset.owner_email} />
         <Field label="Freshness" value={asset.freshness} />
@@ -126,13 +131,13 @@ export default function AssetDetail() {
 
       {schemaColumns && (
         <div>
-          <h2 className="mb-3 text-lg font-semibold text-gray-800">
+          <h2 className="mb-3 font-display text-lg font-bold text-gray-800">
             Schema
             <span className="ml-2 text-sm font-normal text-gray-400">
               {schemaColumns.length} column{schemaColumns.length !== 1 ? "s" : ""}
             </span>
           </h2>
-          <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-gray-200">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -144,10 +149,10 @@ export default function AssetDetail() {
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
                 {schemaColumns.map((col, idx) => (
-                  <tr key={col.id ?? idx} className="hover:bg-fuchsia-100/30 transition-colors">
+                  <tr key={col.id ?? idx} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-sm font-medium text-gray-800">{col.name}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-fuchsia-100 border border-fuchsia-300 px-2 py-0.5 text-xs font-medium text-fuchsia-900">
+                      <span className="font-mono text-xs text-gray-500">
                         {col.type || "—"}
                       </span>
                     </td>
@@ -179,7 +184,7 @@ export default function AssetDetail() {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs font-semibold uppercase tracking-wider text-gray-400">{label}</dt>
+      <dt className="font-mono text-xs font-medium uppercase tracking-wider text-gray-400">{label}</dt>
       <dd className="mt-1 text-sm text-gray-800">{value || "—"}</dd>
     </div>
   );

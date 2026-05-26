@@ -48,6 +48,7 @@ backend/
 │       ├── team_members.py   # Team membership management
 │       ├── domains.py        # Domain CRUD
 │       ├── assets.py         # Asset CRUD + publish/unpublish
+│       ├── layers.py         # Data-layer CRUD (superadmin writes)
 │       ├── access_requests.py# Access request workflow
 │       └── test_data.py      # Seed endpoint (dev only, gated by env var)
 ├── tests/
@@ -83,6 +84,8 @@ frontend/
 │   │   ├── AssetList.tsx     # Filterable asset table
 │   │   ├── AssetDetail.tsx   # Asset detail panel with schema viewer
 │   │   ├── AssetForm.tsx     # Create / edit asset form
+│   │   ├── SourceTypeIcon.tsx# Flat per-source-type glyphs
+│   │   ├── LayerBadge.tsx    # Colored data-layer badge
 │   │   ├── DomainList.tsx    # Domain cards
 │   │   ├── TeamList.tsx      # Team cards
 │   │   ├── TeamDetail.tsx    # Members list + add-member autocomplete
@@ -93,6 +96,7 @@ frontend/
 │       ├── HomePage.tsx      # Dashboard — stats and recent assets
 │       ├── AssetsPage.tsx    # /assets — list + search
 │       ├── DomainsPage.tsx   # /domains — domain management
+│       ├── ClassificationPage.tsx # /classification — data-layer management
 │       ├── ProfilePage.tsx   # /profile — current user settings
 │       └── UsersPage.tsx     # /users — superadmin user management
 ├── vite.config.ts
@@ -110,6 +114,7 @@ frontend/
 | `/` | `HomePage` | Stats cards + recent published assets |
 | `/assets` | `AssetsPage` | Searchable, filterable asset list |
 | `/domains` | `DomainsPage` | Domain list; managers can create/delete |
+| `/classification` | `ClassificationPage` | Data-layer list + asset counts; superadmins add/rename/remove |
 | `/profile` | `ProfilePage` | Update name, avatar, change password |
 | `/users` | `UsersPage` | Superadmin only — user + team management |
 
