@@ -129,6 +129,8 @@ class AssetOut(BaseModel):
     published: bool = False
     created_at: datetime
     updated_at: datetime
+    team_id: str | None = None
+    domain_name: str | None = None
 
 # ── Access Request ────────────────────────────────────────────────────────
 

@@ -8,6 +8,7 @@ from app.auth import (
     get_current_user,
     get_current_user_optional,
     is_platform_team_member,
+    is_superadmin_or_platform,
     is_team_member,
 )
 from app.database import get_db
@@ -20,6 +21,7 @@ _COLS = (
     "id, domain_id, name, description, source_type, connection_uri, "
     "schema_json, owner_email, tags, quality_score, freshness, published, created_at, updated_at"
 )
+_QCOLS = ", ".join(f"a.{c.strip()}" for c in _COLS.split(","))
 
 
 def _row_to_asset(row: tuple) -> AssetOut:
@@ -72,29 +74,35 @@ async def list_assets(
         where_parts.append("a.published = TRUE")
     else:
         # Authenticated user – check if platform team
-        if not is_platform_team_member(user_email, db):
+        if not is_superadmin_or_platform(user_email, db):
             # Restrict to assets whose domain belongs to a team the user is a member of
             team_rows = db.execute(
                 "SELECT team_id FROM team_members WHERE email = ?", [user_email]
             ).fetchall()
             team_ids = [row[0] for row in team_rows]
-            if not team_ids:
-                # User belongs to no team – return empty list
-                return []
-            placeholders = ",".join(["?"] * len(team_ids))
-            where_parts.append(f"d.team_id IN ({placeholders})")
-            params.extend(team_ids)
+            if team_ids:
+                placeholders = ",".join(["?"] * len(team_ids))
+                # Published assets are visible to all; own-team assets are always visible
+                where_parts.append(f"(a.published = TRUE OR d.team_id IN ({placeholders}))")
+                params.extend(team_ids)
+            else:
+                # No team membership – only published assets
+                where_parts.append("a.published = TRUE")
 
     where_clause = f" WHERE {' AND '.join(where_parts)}" if where_parts else ""
     # Join assets with domains to enforce team filtering
     query = (
-        f"SELECT a.{_COLS} FROM assets a JOIN domains d ON a.domain_id = d.id"
+        f"SELECT {_QCOLS}, d.name FROM assets a JOIN domains d ON a.domain_id = d.id"
         f"{where_clause} ORDER BY a.name LIMIT ? OFFSET ?"
     )  # noqa: S608
     params.extend([limit, offset])
 
+    ncols = len(_COLS.split(", "))
     rows = db.execute(query, params).fetchall()
-    return [_row_to_asset(r) for r in rows]
+    assets = [_row_to_asset(r[:ncols]) for r in rows]
+    for asset, row in zip(assets, rows):
+        asset.domain_name = row[ncols]
+    return assets
 
 # ---------------------------------------------------------------------------
 # Publish / Unpublish endpoints – toggle the ``published`` flag
@@ -120,7 +128,7 @@ def publish_asset(
     team_id = asset_row[1]
     
     # Check if user is platform team member or belongs to the asset's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+    if not (is_superadmin_or_platform(user_email, db) or is_team_member(user_email, team_id, db)):
         raise HTTPException(status_code=403, detail="Not authorized to publish this asset")
     
     db.execute("UPDATE assets SET published = TRUE, updated_at = current_timestamp WHERE id = ?", [asset_id])
@@ -147,7 +155,7 @@ def unpublish_asset(
     team_id = asset_row[1]
     
     # Check if user is platform team member or belongs to the asset's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+    if not (is_superadmin_or_platform(user_email, db) or is_team_member(user_email, team_id, db)):
         raise HTTPException(status_code=403, detail="Not authorized to unpublish this asset")
     
     db.execute("UPDATE assets SET published = FALSE, updated_at = current_timestamp WHERE id = ?", [asset_id])
@@ -169,7 +177,7 @@ async def create_asset(
     team_id = domain_row[1]
     
     # Check if user is platform team member or belongs to the domain's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+    if not (is_superadmin_or_platform(user_email, db) or is_team_member(user_email, team_id, db)):
         raise HTTPException(status_code=403, detail="Not authorized to create assets in this domain")
 
     asset_id = str(uuid.uuid4())
@@ -212,7 +220,7 @@ def get_asset_internal(
     """
     # Join with domains to obtain the owning team_id for access checks
     rows = db.execute(
-        f"SELECT a.{_COLS}, d.team_id FROM assets a "
+        f"SELECT {_QCOLS}, d.team_id, d.name FROM assets a "
         "JOIN domains d ON a.domain_id = d.id WHERE a.id = ?",  # noqa: S608
         [asset_id],
     ).fetchall()
@@ -220,19 +228,26 @@ def get_asset_internal(
     if not rows:
         raise HTTPException(status_code=404, detail="Asset not found")
 
-    # The original columns are first; team_id is the last element
     asset_row = rows[0]
-    asset = _row_to_asset(asset_row[: len(_COLS.split(', '))])
-    team_id = asset_row[-1]
+    ncols = len(_COLS.split(", "))
+    asset = _row_to_asset(asset_row[:ncols])
+    team_id = asset_row[ncols]
+    asset.domain_name = asset_row[ncols + 1]
 
     # Access control
     if not user_email:
         if not asset.published:
             raise HTTPException(status_code=404, detail="Asset not found")
     else:
-        if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+        can_access = (
+            asset.published
+            or is_superadmin_or_platform(user_email, db)
+            or is_team_member(user_email, team_id, db)
+        )
+        if not can_access:
             raise HTTPException(status_code=404, detail="Asset not found")
 
+    asset.team_id = team_id
     return asset
 
 
@@ -257,7 +272,7 @@ async def update_asset(
     team_id = asset_row[1]
     
     # Check if user is platform team member or belongs to the asset's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+    if not (is_superadmin_or_platform(user_email, db) or is_team_member(user_email, team_id, db)):
         raise HTTPException(status_code=403, detail="Not authorized to update this asset")
 
     updates = body.model_dump(exclude_unset=True)
@@ -292,7 +307,7 @@ async def delete_asset(
     team_id = asset_row[1]
     
     # Check if user is platform team member or belongs to the asset's team
-    if not (is_platform_team_member(user_email, db) or is_team_member(user_email, team_id, db)):
+    if not (is_superadmin_or_platform(user_email, db) or is_team_member(user_email, team_id, db)):
         raise HTTPException(status_code=403, detail="Not authorized to delete this asset")
     
     db.execute("DELETE FROM assets WHERE id = ?", [asset_id])

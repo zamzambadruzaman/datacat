@@ -29,13 +29,18 @@ export default function AssetList({
         >
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">{a.name}</h3>
-            {a.source_type && (
-              <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
-                {a.source_type}
-              </span>
-            )}
+            <div className="flex items-center gap-1.5">
+              {a.source_type && (
+                <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                  {a.source_type}
+                </span>
+              )}
+            </div>
           </div>
-          <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+          {a.domain_name && (
+            <p className="mt-1 text-xs text-gray-400">{a.domain_name}</p>
+          )}
+          <p className="mt-0.5 text-sm text-gray-500 line-clamp-2">
             {a.description || "No description"}
           </p>
           {a.tags && (

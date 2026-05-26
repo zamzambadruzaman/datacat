@@ -1,4 +1,4 @@
-function getUserEmail(): string | null {
+export function getUserEmail(): string | null {
   return localStorage.getItem("datacat_user_email");
 }
 
@@ -61,6 +61,8 @@ export interface Asset {
   published: boolean;
   created_at: string;
   updated_at: string;
+  team_id?: string;
+  domain_name?: string;
 }
 
 export interface AccessRequest {
