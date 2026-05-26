@@ -95,6 +95,26 @@ class TeamMemberOut(BaseModel):
     role: str
 
 
+# ── Data Layer ────────────────────────────────────────────────────────────
+
+class DataLayerCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=64)
+    color: str = "#9CA3AF"
+
+
+class DataLayerUpdate(BaseModel):
+    name: str | None = Field(None, min_length=1, max_length=64)
+    color: str | None = None
+    position: int | None = None
+
+
+class DataLayerOut(BaseModel):
+    id: str
+    name: str
+    color: str
+    position: int
+
+
 # ── Asset ───────────────────────────────────────────────────────────────────
 
 SOURCE_TYPES = {"snowflake", "bigquery", "redshift", "synapse", "postgres", "s3", "gcs"}
@@ -111,6 +131,7 @@ class AssetCreate(BaseModel):
     tags: str = ""
     quality_score: float | None = None
     freshness: str = ""
+    layer_id: str | None = None
 
 
 class AssetUpdate(BaseModel):
@@ -123,6 +144,7 @@ class AssetUpdate(BaseModel):
     tags: str | None = None
     quality_score: float | None = None
     freshness: str | None = None
+    layer_id: str | None = None
 
 
 class AssetOut(BaseModel):
@@ -142,6 +164,7 @@ class AssetOut(BaseModel):
     updated_at: datetime
     team_id: str | None = None
     domain_name: str | None = None
+    layer_id: str | None = None
 
 # ── Access Request ────────────────────────────────────────────────────────
 

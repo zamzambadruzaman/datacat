@@ -8,12 +8,24 @@
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased font-sans;
+  }
+
+  /* Tabular, lining figures for numeric readouts */
+  .tnum {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
   }
 }
 
 @layer utilities {
   .glass {
     @apply bg-white/80 backdrop-blur-sm;
+  }
+
+  /* Faint dotted-grid texture for atmosphere */
+  .bg-dotgrid {
+    background-image: radial-gradient(rgba(134, 25, 143, 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 }

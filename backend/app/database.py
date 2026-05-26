@@ -63,6 +63,22 @@ def _init_tables(conn: duckdb.DuckDBPyConnection) -> None:
         )
     """)
     
+    # Data layers table – configurable classification (landing, bronze, silver, gold, …)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS data_layers (
+            id          VARCHAR PRIMARY KEY,
+            name        VARCHAR UNIQUE NOT NULL,
+            color       VARCHAR DEFAULT '#9CA3AF',
+            position    INTEGER DEFAULT 0,
+            created_at  TIMESTAMP DEFAULT current_timestamp
+        )
+    """)
+
+    # Asset → layer classification (nullable). Migration for predating databases.
+    asset_cols = [r[1] for r in conn.execute("PRAGMA table_info('assets')").fetchall()]
+    if "layer_id" not in asset_cols:
+        conn.execute("ALTER TABLE assets ADD COLUMN layer_id VARCHAR")
+
     # Access requests table – data consumer requests for asset access
     conn.execute("""
         CREATE TABLE IF NOT EXISTS access_requests (
@@ -107,7 +123,27 @@ def get_connection() -> duckdb.DuckDBPyConnection:
         _init_tables(_connection)
         _create_platform_team(_connection)
         _bootstrap_superadmin(_connection)
+        _seed_data_layers(_connection)
     return _connection
+
+
+def _seed_data_layers(conn: duckdb.DuckDBPyConnection) -> None:
+    """Seed the default medallion layers if none exist yet."""
+    import uuid
+    existing = conn.execute("SELECT 1 FROM data_layers LIMIT 1").fetchone()
+    if existing:
+        return
+    defaults = [
+        ("landing", "#64748B", 0),
+        ("bronze", "#B45309", 1),
+        ("silver", "#9CA3AF", 2),
+        ("gold", "#D97706", 3),
+    ]
+    for name, color, position in defaults:
+        conn.execute(
+            "INSERT INTO data_layers (id, name, color, position) VALUES (?, ?, ?, ?)",
+            [str(uuid.uuid4()), name, color, position],
+        )
 
 
 def _create_platform_team(conn: duckdb.DuckDBPyConnection) -> None:

@@ -63,6 +63,14 @@ export interface Asset {
   updated_at: string;
   team_id?: string;
   domain_name?: string;
+  layer_id?: string | null;
+}
+
+export interface DataLayer {
+  id: string;
+  name: string;
+  color: string;
+  position: number;
 }
 
 export interface AccessRequest {
@@ -119,11 +127,12 @@ export const deleteDomain = (id: string) =>
 
 // ── Assets ─────────────────────────────────────────────────────
 
-export const fetchAssets = (params?: { q?: string; domain_id?: string; source_type?: string; published?: boolean }) => {
+export const fetchAssets = (params?: { q?: string; domain_id?: string; source_type?: string; layer_id?: string; published?: boolean }) => {
   const sp = new URLSearchParams();
   if (params?.q) sp.set("q", params.q);
   if (params?.domain_id) sp.set("domain_id", params.domain_id);
   if (params?.source_type) sp.set("source_type", params.source_type);
+  if (params?.layer_id) sp.set("layer_id", params.layer_id);
   const qs = sp.toString();
   return apiFetch<Asset[]>(`/assets${qs ? `?${qs}` : ""}`);
 };
@@ -144,6 +153,19 @@ export const publishAsset = (id: string) =>
 
 export const unpublishAsset = (id: string) =>
   apiFetch<Asset>(`/assets/${id}/unpublish`, { method: "POST" });
+
+// ── Data Layers ────────────────────────────────────────────────────────────
+
+export const fetchLayers = () => apiFetch<DataLayer[]>("/layers");
+
+export const createLayer = (data: { name: string; color?: string }) =>
+  apiFetch<DataLayer>("/layers", { method: "POST", body: JSON.stringify(data) });
+
+export const updateLayer = (id: string, data: { name?: string; color?: string; position?: number }) =>
+  apiFetch<DataLayer>(`/layers/${id}`, { method: "PUT", body: JSON.stringify(data) });
+
+export const deleteLayer = (id: string) =>
+  apiFetch<void>(`/layers/${id}`, { method: "DELETE" });
 
 // ── Access Requests ───────────────────────────────────────────────────────
 

@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/assets", tags=["assets"])
 
 _COLS = (
     "id, domain_id, name, description, source_type, connection_uri, "
-    "schema_json, owner_email, tags, quality_score, freshness, published, created_at, updated_at"
+    "schema_json, owner_email, tags, quality_score, freshness, published, created_at, updated_at, layer_id"
 )
 _QCOLS = ", ".join(f"a.{c.strip()}" for c in _COLS.split(","))
 
@@ -40,6 +40,7 @@ def _row_to_asset(row: tuple) -> AssetOut:
         published=row[11],
         created_at=row[12],
         updated_at=row[13],
+        layer_id=row[14],
     )
 
 
@@ -48,6 +49,7 @@ async def list_assets(
     q: str | None = Query(None, description="Search asset name/description"),
     domain_id: str | None = Query(None),
     source_type: str | None = Query(None),
+    layer_id: str | None = Query(None),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     db: duckdb.DuckDBPyConnection = Depends(get_db),
@@ -67,6 +69,12 @@ async def list_assets(
     if source_type:
         where_parts.append("a.source_type = ?")
         params.append(source_type)
+    if layer_id:
+        where_parts.append("a.layer_id = ?")
+        params.append(layer_id)
+    if q:
+        where_parts.append("(a.name ILIKE ? OR a.description ILIKE ?)")
+        params.extend([f"%{q}%", f"%{q}%"])
 
     # Access control
     if not user_email:
@@ -185,13 +193,13 @@ async def create_asset(
     db.execute(
         "INSERT INTO assets "
         "(id, domain_id, name, description, source_type, connection_uri, "
-        "schema_json, owner_email, tags, quality_score, freshness, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "schema_json, owner_email, tags, quality_score, freshness, layer_id, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
             asset_id, body.domain_id, body.name, body.description,
             body.source_type, body.connection_uri, body.schema_json,
             body.owner_email, body.tags, body.quality_score, body.freshness,
-            now, now,
+            body.layer_id, now, now,
         ],
     )
     return get_asset_internal(asset_id, db, user_email)
