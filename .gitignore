@@ -35,3 +35,7 @@ frontend/.vite/
 .idea/
 *.swp
 *.swo
+
+# Claude
+.claude/
+memory/
