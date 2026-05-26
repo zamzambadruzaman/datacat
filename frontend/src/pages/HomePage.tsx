@@ -10,12 +10,10 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      {/* Hero */}
-      <div className="rounded-2xl bg-gradient-to-br from-gray-950 via-gray-900 to-fuchsia-950 p-8 text-white shadow-xl">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-fuchsia-300 bg-clip-text text-transparent">
-          datacat
-        </h1>
-        <p className="mt-2 text-gray-400 text-lg">Your lightweight data catalog</p>
+      {/* Page header */}
+      <div className="border-b border-gray-200 pb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Welcome to datacat</h1>
+        <p className="mt-1 text-gray-500">Your lightweight data catalog</p>
       </div>
 
       {/* Stats */}
