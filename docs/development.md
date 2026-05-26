@@ -149,14 +149,14 @@ curl -X POST http://localhost:8000/api/test/seed-data
 
 ## Rebuilding Docker images
 
-After backend code changes:
+After **backend** code changes (the backend image is not volume-mounted):
 
 ```bash
 docker compose build backend
 docker compose up backend
 ```
 
-After frontend dependency changes (`package.json`):
+The **frontend** source is bind-mounted into the container (`./frontend:/app` with an anonymous volume for `node_modules`), so Vite hot-reloads source edits live — no rebuild needed. Rebuild the frontend only after **dependency** changes (`package.json`):
 
 ```bash
 docker compose build frontend

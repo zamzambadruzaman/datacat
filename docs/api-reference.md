@@ -277,6 +277,48 @@ Delete a domain and **cascade-delete all assets** within it.
 
 ---
 
+## Data Layers
+
+Configurable data-layer classifications (medallion-style: landing → bronze → silver → gold). Reading is available to any authenticated user; all writes are **superadmin only**. Assets reference a layer via `assets.layer_id`.
+
+### `GET /api/layers`
+
+List all layers ordered by `position`.
+
+**Response `200`**
+
+```json
+[
+  { "id": "uuid", "name": "bronze", "color": "#B45309", "position": 1 }
+]
+```
+
+### `POST /api/layers` *(superadmin)*
+
+Create a layer. `name` must be unique (case-insensitive). New layers are appended to the end (`position = max + 1`).
+
+```json
+{ "name": "platinum", "color": "#22D3EE" }
+```
+
+**Response `201`** — `DataLayerOut`. Returns `409` if the name already exists.
+
+### `PUT /api/layers/{id}` *(superadmin)*
+
+Rename, recolor, or reorder a layer. All fields optional.
+
+```json
+{ "name": "diamond", "color": "#3B82F6", "position": 4 }
+```
+
+### `DELETE /api/layers/{id}` *(superadmin)*
+
+Remove a layer. Any assets referencing it have their `layer_id` set to `NULL` (assets become unclassified, they are **not** deleted).
+
+**Response `204`**
+
+---
+
 ## Assets
 
 ### `GET /api/assets`
@@ -287,9 +329,10 @@ List and search assets. **No auth required** — but only returns **published** 
 
 | Param | Description |
 |---|---|
-| `q` | Full-text search across name, description, and tags |
+| `q` | Case-insensitive search across name and description |
 | `domain_id` | Filter by domain UUID |
 | `source_type` | Filter by source type (e.g. `bigquery`, `snowflake`) |
+| `layer_id` | Filter by data-layer UUID (see [Data Layers](#data-layers)) |
 
 **Response `200`**
 
@@ -311,10 +354,13 @@ List and search assets. **No auth required** — but only returns **published** 
     "published": true,
     "created_at": "2026-01-01T00:00:00Z",
     "updated_at": "2026-01-01T00:00:00Z",
-    "team_id": "uuid"
+    "team_id": "uuid",
+    "layer_id": "uuid"
   }
 ]
 ```
+
+`layer_id` is `null` when the asset is unclassified.
 
 ### `POST /api/assets` *(member+)*
 
@@ -331,9 +377,12 @@ Register a new asset. The caller must be a member of the domain's owning team.
   "owner_email": "rm@catairways.com",
   "tags": "bookings,revenue",
   "quality_score": 0.97,
-  "freshness": "hourly"
+  "freshness": "hourly",
+  "layer_id": "uuid"
 }
 ```
+
+`layer_id` is optional — omit or set `null` to leave the asset unclassified. It can also be set/changed later via `PUT /api/assets/{id}`.
 
 **Response `201`** — `AssetOut`
 

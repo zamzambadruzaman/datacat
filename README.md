@@ -13,6 +13,7 @@ Powered by **FastAPI**, **DuckDB**, and **React**.
 - **Domain ownership** — assets are grouped into domains owned by teams
 - **Role-based access** — superadmin, manager, and member roles with scoped visibility
 - **Asset catalog** — register tables, streams, files, and APIs with schema, tags, quality score, and freshness
+- **Data classification** — organize assets by configurable data layers (landing, bronze, silver, gold); superadmins can add, rename, recolor, or remove layers
 - **Publish workflow** — assets are draft by default; managers explicitly publish when ready
 - **Access requests** — consumers request access; managers approve or deny
 - **Self-hosted** — single Docker Compose command, data stored in a local DuckDB file

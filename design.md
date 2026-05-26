@@ -83,8 +83,22 @@ Domain  1------* Asset
 | `tags` | `VARCHAR[]` | Comma-separated tag strings |
 | `quality_score` | `FLOAT` | 0.0-1.0, nullable |
 | `freshness` | `VARCHAR` | e.g. `daily`, `hourly`, `real-time` |
+| `published` | `BOOLEAN` | Draft by default |
+| `layer_id` | `UUID` | FK -> data_layers, nullable (classification) |
 | `created_at` | `TIMESTAMP` | |
 | `updated_at` | `TIMESTAMP` | |
+
+#### `data_layers`
+
+Configurable medallion-style data layers (landing, bronze, silver, gold) used to classify assets. Seeded with defaults on first startup; superadmins manage them via the UI / `/api/layers`.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `UUID` | PK |
+| `name` | `VARCHAR` | Unique |
+| `color` | `VARCHAR` | Hex color for badges/icons |
+| `position` | `INTEGER` | Sort order |
+| `created_at` | `TIMESTAMP` | |
 
 ---
 
@@ -138,11 +152,15 @@ datacat/
 | `GET` | `/api/domains/{id}` | Get domain detail |
 | `PUT` | `/api/domains/{id}` | Update a domain |
 | `DELETE` | `/api/domains/{id}` | Delete a domain |
-| `GET` | `/api/assets` | List/search assets (`?q=`, `?domain_id=`, `?source_type=`) |
+| `GET` | `/api/assets` | List/search assets (`?q=`, `?domain_id=`, `?source_type=`, `?layer_id=`) |
 | `POST` | `/api/assets` | Register a new asset |
 | `GET` | `/api/assets/{id}` | Get asset detail |
 | `PUT` | `/api/assets/{id}` | Update an asset |
 | `DELETE` | `/api/assets/{id}` | Delete an asset |
+| `GET` | `/api/layers` | List data layers |
+| `POST` | `/api/layers` | Create a data layer *(superadmin)* |
+| `PUT` | `/api/layers/{id}` | Rename/recolor/reorder a layer *(superadmin)* |
+| `DELETE` | `/api/layers/{id}` | Delete a layer; unclassifies its assets *(superadmin)* |
 
 All mutating endpoints require `X-API-KEY`. Read endpoints are open by default
 (configurable via `AUTH_READ_ENDPOINTS=true`).
@@ -188,6 +206,7 @@ datacat/
 | `/assets/:id` | `AssetDetail` | Full asset view with schema viewer |
 | `/assets/new` | `AssetForm` | Register new asset |
 | `/domains` | `DomainsPage` | Domain list & management |
+| `/classification` | `ClassificationPage` | Data-layer management (superadmin) |
 
 ### 6.3 State Management
 
