@@ -242,7 +242,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={pwMutation.isPending}
-            className="px-4 py-2 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 disabled:opacity-50 transition"
+            className="px-4 py-2 bg-fuchsia-600 text-white text-sm rounded-lg hover:bg-fuchsia-700 disabled:opacity-50 transition-all duration-150"
           >
             {pwMutation.isPending ? "Updating…" : "Update password"}
           </button>
