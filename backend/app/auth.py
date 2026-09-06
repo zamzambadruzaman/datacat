@@ -51,13 +51,17 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
+    api_key: str | None = Security(_api_key_header),
     token: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> str | None:
     """Optional version of :func:`get_current_user` – returns ``None`` if no
-    bearer token is supplied.  Used for public read endpoints.
+    bearer token or valid API key is supplied.  Used for read endpoints that
+    apply their own access-control checks once a caller is identified.
     """
     if token:
         return decode_access_token(token.credentials)
+    if api_key and hmac.compare_digest(api_key, settings.api_key):
+        return settings.default_user_email
     return None
 
 
