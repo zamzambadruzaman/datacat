@@ -157,7 +157,7 @@ async def update_domain(
     updates["updated_at"] = datetime.now(timezone.utc)
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [domain_id]
-    db.execute(f"UPDATE domains SET {set_clause} WHERE id = ?", values)  # noqa: S608
+    db.execute(f"UPDATE domains SET {set_clause} WHERE id = ?", values)
 
     return _get_domain_internal(domain_id, db, user_email)
 

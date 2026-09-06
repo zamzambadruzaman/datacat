@@ -1,13 +1,12 @@
 import hmac
-import duckdb
 
-from fastapi import Depends, HTTPException, Security, Header
-from fastapi.security import APIKeyHeader
+import duckdb
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
-from fastapi import Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from .auth_utils import verify_password, create_access_token, decode_access_token
+
+from .auth_utils import decode_access_token
 
 _api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 _bearer_scheme = HTTPBearer(auto_error=False)
