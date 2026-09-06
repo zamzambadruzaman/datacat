@@ -1,13 +1,12 @@
 import hmac
-import duckdb
 
-from fastapi import Depends, HTTPException, Security, Header
-from fastapi.security import APIKeyHeader
+import duckdb
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
-from fastapi import Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from .auth_utils import verify_password, create_access_token, decode_access_token
+
+from .auth_utils import decode_access_token
 
 _api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 _bearer_scheme = HTTPBearer(auto_error=False)
@@ -51,13 +50,17 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
+    api_key: str | None = Security(_api_key_header),
     token: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> str | None:
     """Optional version of :func:`get_current_user` – returns ``None`` if no
-    bearer token is supplied.  Used for public read endpoints.
+    bearer token or valid API key is supplied.  Used for read endpoints that
+    apply their own access-control checks once a caller is identified.
     """
     if token:
         return decode_access_token(token.credentials)
+    if api_key and hmac.compare_digest(api_key, settings.api_key):
+        return settings.default_user_email
     return None
 
 

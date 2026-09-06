@@ -10,20 +10,33 @@ def test_create_domain_requires_api_key(client):
 
 
 def test_domain_crud(client, api_headers):
+    # Create a team so the caller has a team to own the domain
+    r = client.post("/api/teams", json={"name": "finance-team"}, headers=api_headers)
+    assert r.status_code == 201
+    team_id = r.json()["id"]
+
     # Create
-    r = client.post("/api/domains", json={"name": "finance", "owner_email": "team@example.com"}, headers=api_headers)
+    r = client.post(
+        "/api/domains",
+        json={"name": "finance", "owner_email": "team@example.com", "team_id": team_id},
+        headers=api_headers,
+    )
     assert r.status_code == 201
     domain = r.json()
     assert domain["name"] == "finance"
     domain_id = domain["id"]
 
     # List
-    r = client.get("/api/domains")
+    r = client.get("/api/domains", headers=api_headers)
     assert r.status_code == 200
     assert len(r.json()) >= 1
 
-    # Get
+    # Get requires authentication
     r = client.get(f"/api/domains/{domain_id}")
+    assert r.status_code == 401
+
+    # Get
+    r = client.get(f"/api/domains/{domain_id}", headers=api_headers)
     assert r.status_code == 200
     assert r.json()["name"] == "finance"
 
@@ -35,6 +48,20 @@ def test_domain_crud(client, api_headers):
     # Delete
     r = client.delete(f"/api/domains/{domain_id}", headers=api_headers)
     assert r.status_code == 204
+
+
+def test_team_members_require_auth(client, api_headers):
+    r = client.post("/api/teams", json={"name": "ops-team"}, headers=api_headers)
+    assert r.status_code == 201
+    team_id = r.json()["id"]
+
+    # Unauthenticated
+    r = client.get(f"/api/teams/{team_id}/members")
+    assert r.status_code == 401
+
+    # Authenticated (creator is an owner/member of the team)
+    r = client.get(f"/api/teams/{team_id}/members", headers=api_headers)
+    assert r.status_code == 200
 
 
 def test_asset_crud(client, api_headers):

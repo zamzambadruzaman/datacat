@@ -10,7 +10,14 @@ import uuid
 import duckdb
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.auth import get_current_user, is_platform_team_member, is_team_manager
+from app.auth import (
+    get_current_user,
+    get_current_user_optional,
+    is_platform_team_member,
+    is_superadmin_or_platform,
+    is_team_manager,
+    is_team_member,
+)
 from app.database import get_db
 from app.schemas import TeamMemberCreate, TeamMemberOut, TeamMemberUpdate
 
@@ -27,10 +34,18 @@ def _require_manager(team_id: str, user_email: str, db: duckdb.DuckDBPyConnectio
 def list_team_members(
     team_id: str,
     db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
 ):
-    """List all members of a team (public endpoint)."""
+    """List all members of a team (requires team membership)."""
+    if not user_email:
+        raise HTTPException(status_code=401, detail="Authentication required")
     if not db.execute("SELECT id FROM teams WHERE id = ?", [team_id]).fetchone():
         raise HTTPException(status_code=404, detail="Team not found")
+    if not (
+        is_superadmin_or_platform(user_email, db)
+        or is_team_member(user_email, team_id, db)
+    ):
+        raise HTTPException(status_code=401, detail="Authentication required")
     rows = db.execute(
         "SELECT id, team_id, email, role FROM team_members WHERE team_id = ? ORDER BY email",
         [team_id],

@@ -10,6 +10,7 @@ from app.auth import (
     is_platform_team_member,
     is_superadmin_or_platform,
     is_team_manager,
+    is_team_member,
 )
 from app.database import get_db
 from app.schemas import DomainCreate, DomainOut, DomainUpdate
@@ -90,8 +91,27 @@ async def create_domain(
 async def get_domain(
     domain_id: str,
     db: duckdb.DuckDBPyConnection = Depends(get_db),
+    user_email: str | None = Depends(get_current_user_optional),
 ):
-    """Get a domain by ID (public endpoint)."""
+    """Get a domain by ID (requires team membership)."""
+    return _get_domain_internal(domain_id, db, user_email)
+
+
+def _get_domain_internal(
+    domain_id: str,
+    db: duckdb.DuckDBPyConnection,
+    user_email: str | None = None,
+) -> DomainOut:
+    """Internal helper to get a domain with access control.
+
+    * Unauthenticated users receive 401.
+    * Platform team / superadmin can retrieve any domain.
+    * Regular users can only retrieve domains belonging to a team they
+      are a member of; otherwise 401.
+    """
+    if not user_email:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
     rows = db.execute(
         "SELECT id, name, description, team_id, created_at, updated_at "
         "FROM domains WHERE id = ?",
@@ -99,7 +119,14 @@ async def get_domain(
     ).fetchall()
     if not rows:
         raise HTTPException(status_code=404, detail="Domain not found")
-    return _row_to_domain(rows[0])
+
+    domain = _row_to_domain(rows[0])
+    if not (
+        is_superadmin_or_platform(user_email, db)
+        or is_team_member(user_email, domain.team_id, db)
+    ):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return domain
 
 
 @router.put("/{domain_id}", response_model=DomainOut)
@@ -130,9 +157,9 @@ async def update_domain(
     updates["updated_at"] = datetime.now(timezone.utc)
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [domain_id]
-    db.execute(f"UPDATE domains SET {set_clause} WHERE id = ?", values)  # noqa: S608
+    db.execute(f"UPDATE domains SET {set_clause} WHERE id = ?", values)
 
-    return await get_domain(domain_id, db)
+    return _get_domain_internal(domain_id, db, user_email)
 
 
 @router.delete("/{domain_id}", status_code=204)
