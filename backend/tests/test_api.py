@@ -111,3 +111,59 @@ def test_asset_requires_valid_domain(client, api_headers):
         headers=api_headers,
     )
     assert r.status_code == 400
+
+
+def test_access_request_succeeds_when_smtp_unreachable(client, api_headers, monkeypatch):
+    """Regression for issue #10.
+
+    On the default configuration ``SMTP_HOST`` is ``localhost`` with nothing
+    listening, so sending the owner-notification email raises
+    ``ConnectionRefusedError``.  Submitting an access request must still
+    succeed (return 201) and must create the row; the email failure is
+    non-fatal and silently skipped.
+    """
+    import smtplib
+    import app.database as database
+
+    # Force an unreachable SMTP server, mirroring the default install.
+    def _refuse(*args, **kwargs):
+        raise ConnectionRefusedError(61, "Connection refused")
+
+    monkeypatch.setattr(smtplib, "SMTP", _refuse)
+
+    # Set up a team -> domain -> asset so we have something to request.
+    r = client.post("/api/teams", json={"name": "req-team"}, headers=api_headers)
+    assert r.status_code == 201
+    team_id = r.json()["id"]
+
+    r = client.post(
+        "/api/domains",
+        json={"name": "req-domain", "owner_email": "owner@example.com", "team_id": team_id},
+        headers=api_headers,
+    )
+    assert r.status_code == 201
+    domain_id = r.json()["id"]
+
+    r = client.post(
+        "/api/assets",
+        json={"domain_id": domain_id, "name": "req_asset", "owner_email": "owner@example.com"},
+        headers=api_headers,
+    )
+    assert r.status_code == 201
+    asset_id = r.json()["id"]
+
+    # Submit the access request as an anonymous consumer (public endpoint).
+    r = client.post(
+        "/api/access-requests",
+        json={"asset_id": asset_id, "requester_email": "consumer@example.com"},
+    )
+    assert r.status_code == 201
+    request_id = r.json()["id"]
+    assert r.json()["status"] == "pending"
+
+    # The row must have been persisted despite the email failure.
+    row = database.get_connection().execute(
+        "SELECT id, status FROM access_requests WHERE id = ?", [request_id]
+    ).fetchone()
+    assert row is not None
+    assert row[1] == "pending"

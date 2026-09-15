@@ -67,7 +67,7 @@ CORS_ORIGINS=https://catalog.catairways.com,https://staging.catairways.com
 
 ### Email / SMTP (optional)
 
-Used to send notifications when access requests are approved or denied. All fields are optional — if `SMTP_HOST` is not set, email notifications are silently skipped.
+Used to send notifications when access requests are approved or denied. All fields are optional — if the SMTP server is unconfigured or unreachable (for example the default `localhost:25` with nothing listening), email notifications are skipped: the failure is logged as a warning and never fails the request that triggered it.
 
 | Variable | Default | Description |
 |---|---|---|
