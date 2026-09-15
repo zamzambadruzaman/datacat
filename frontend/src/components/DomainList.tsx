@@ -5,7 +5,7 @@ import { fetchDomains, fetchTeams, createDomain, deleteDomain, fetchMe, Domain, 
 export default function DomainList() {
   const qc = useQueryClient();
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
-  const { data: domains = [], isLoading } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains });
+  const { data: domains = [], isLoading } = useQuery({ queryKey: ["domains"], queryFn: () => fetchDomains() });
   const { data: teams = [] } = useQuery({ queryKey: ["teams"], queryFn: fetchTeams });
 
   const [name, setName] = useState("");

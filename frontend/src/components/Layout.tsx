@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Submenu data
-  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains, enabled: !!token });
+  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: () => fetchDomains(), enabled: !!token });
   const { data: teams } = useQuery({ queryKey: ["teams"], queryFn: fetchTeams, enabled: !!token });
   const { data: assets } = useQuery({ queryKey: ["assets"], queryFn: () => fetchAssets(), enabled: !!token });
   const { data: layers } = useQuery({ queryKey: ["layers"], queryFn: fetchLayers, enabled: !!token });

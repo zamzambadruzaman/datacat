@@ -12,7 +12,7 @@ export default function AssetsPage() {
   const domainId = params.get("domain_id") || undefined;
   const layerId = params.get("layer_id") || undefined;
 
-  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains, enabled: !!domainId });
+  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: () => fetchDomains(), enabled: !!domainId });
   const { data: layers } = useQuery({ queryKey: ["layers"], queryFn: fetchLayers, enabled: !!layerId });
   const domainName = domains?.find((d) => d.id === domainId)?.name;
   const layerName = layers?.find((l) => l.id === layerId)?.name;

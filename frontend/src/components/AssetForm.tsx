@@ -70,7 +70,7 @@ function parseYamlSchema(text: string): SchemaColumn[] {
     for (const raw of lines) {
       const line = raw.trimEnd();
       if (/^\s+-\s+name\s*:/i.test(line)) {
-        if (current?.name) cols.push({ id: crypto.randomUUID(), nullable: true, description: "", type: "", ...current });
+        if (current?.name) cols.push({ id: crypto.randomUUID(), nullable: true, description: "", type: "", ...current, name: current.name });
         current = { name: line.replace(/.*name\s*:\s*/i, "").replace(/^["']|["']$/g, "").trim() };
         continue;
       }
@@ -83,7 +83,7 @@ function parseYamlSchema(text: string): SchemaColumn[] {
       else if (key === "nullable") current.nullable = v !== "false";
       else if (key === "description") current.description = v;
     }
-    if (current?.name) cols.push({ id: crypto.randomUUID(), nullable: true, description: "", type: "", ...current });
+    if (current?.name) cols.push({ id: crypto.randomUUID(), nullable: true, description: "", type: "", ...current, name: current.name });
     return cols;
   }
 
@@ -118,7 +118,7 @@ const inputCls = "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm tra
 export default function AssetForm() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains });
+  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: () => fetchDomains() });
   const { data: layers } = useQuery({ queryKey: ["layers"], queryFn: fetchLayers });
 
   const [form, setForm] = useState({
