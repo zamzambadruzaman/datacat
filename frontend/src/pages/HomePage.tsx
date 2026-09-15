@@ -5,7 +5,7 @@ import SourceTypeIcon from "../components/SourceTypeIcon";
 
 export default function HomePage() {
   const { data: assets } = useQuery({ queryKey: ["assets"], queryFn: () => fetchAssets() });
-  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: fetchDomains });
+  const { data: domains } = useQuery({ queryKey: ["domains"], queryFn: () => fetchDomains() });
 
   const recentAssets = assets?.slice(0, 5) ?? [];
 
